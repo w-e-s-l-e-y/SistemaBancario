@@ -1,6 +1,9 @@
 package org.example;
 
+
 public class ContaCorrente {
+    private static final double SALDO_MINIMO = 100.0; // Defina o saldo mínimo aceito para abrir uma conta
+
     private int id;
     private double saldo;
     private boolean ativa;
@@ -17,6 +20,13 @@ public class ContaCorrente {
         this.ativa = ativa;
     }
 
+    // Método para abrir a conta com depósito obrigatório
+    public static ContaCorrente abrirContaComDeposito(int id, double saldoInicial) {
+        if (saldoInicial < SALDO_MINIMO) { // Verifica se o saldo inicial atende ao limite mínimo
+            throw new IllegalArgumentException("O saldo inicial deve ser igual ou superior a " + SALDO_MINIMO);
+        }
+        return new ContaCorrente(id, saldoInicial, true);
+    }
     public int getId() {
         return id;
     }
