@@ -4,41 +4,41 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        // Criando uma instância da classe GerenciadoraContas
-        GerenciadoraContas gerContas = new GerenciadoraContas();
+        // Criar o banco de dados se ele não existir
+        criarBancoSeNecessario();
 
-        // Adicionando algumas contas correntes
-        ContaCorrente conta1 = new ContaCorrente(1, 1000, true);
-        ContaCorrente conta2 = new ContaCorrente(2, 2000, true);
-        gerContas.adicionarConta(conta1);
-        gerContas.adicionarConta(conta2);
-
-        // Realizando uma transferência entre contas
-        boolean transferenciaRealizada = gerContas.transferir(1, 2, 500);
-        if (transferenciaRealizada) {
-            System.out.println("Transferência realizada com sucesso!");
-        } else {
-            System.out.println("Transferência falhou: saldo insuficiente na conta de origem.");
-        }
-
-        // Verificando o saldo de uma conta
-        double saldoConta1 = gerContas.verificarSaldo(1);
-        System.out.println("Saldo da conta 1: " + saldoConta1);
-
-        // Criar tabelas se elas não existirem no banco de dados
-        criarTabelasSeNecessario();
+        // Restante do código...
     }
 
-    private static void criarTabelasSeNecessario() {
-        // Estabelecer a conexão com o banco de dados (substitua os valores conforme necessário)
-        String url = "jdbc:mysql://localhost:3306/wykbank"; // URL atualizada para "wykbank"
-        String username = "seu_usuario";
-        String password = "sua_senha";
+    private static void criarBancoSeNecessario() {
+        // Definir o caminho para o banco de dados SQLite
+        String path = "C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db"; // Substitua pelo caminho desejado
 
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
+        // Verificar se o banco de dados já existe
+        File dbFile = new File(path);
+        if (!dbFile.exists()) {
+            // Se o banco de dados não existir, criar o arquivo
+            try {
+                if (dbFile.createNewFile()) {
+                    System.out.println("Banco de dados criado com sucesso em: " + path);
+                } else {
+                    System.out.println("Falha ao criar o banco de dados.");
+                    return;
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao criar o banco de dados: " + e.getMessage());
+                return;
+            }
+        }
+
+        // Estabelecer a conexão com o banco de dados SQLite
+        String url = "jdbc:sqlite:" + path;
+
+        try (Connection connection = DriverManager.getConnection(url)) {
             // Criar as tabelas se elas não existirem
             criarTabelaCliente(connection);
             criarTabelaContaCorrente(connection);
@@ -51,7 +51,7 @@ public class Main {
 
     private static void criarTabelaCliente(Connection connection) throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS Cliente (" +
-                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "nome VARCHAR(100) NOT NULL," +
                 "idade INTEGER NOT NULL," +
                 "email VARCHAR(100) NOT NULL," +
@@ -66,7 +66,7 @@ public class Main {
 
     private static void criarTabelaContaCorrente(Connection connection) throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS ContaCorrente (" +
-                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "saldo DECIMAL(10, 2) NOT NULL," +
                 "ativa BOOLEAN NOT NULL," +
                 "cliente_id INTEGER NOT NULL," +
