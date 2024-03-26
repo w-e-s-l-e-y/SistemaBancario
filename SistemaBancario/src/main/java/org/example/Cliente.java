@@ -1,18 +1,14 @@
 package org.example;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 public class Cliente {
     private int id;
     private String nome;
     private int idade;
     private String email;
-    private int tipo;
+    private int tipo; // Suponho que o tipo refira-se a algum tipo específico de cliente (ex: pessoa física, pessoa jurídica, etc.)
     private boolean ativo;
 
+    // Construtor
     public Cliente(int id, String nome, int idade, String email, int tipo, boolean ativo) {
         this.id = id;
         this.nome = nome;
@@ -22,6 +18,7 @@ public class Cliente {
         this.ativo = ativo;
     }
 
+    // Getters e Setters
     public int getId() {
         return id;
     }
@@ -43,7 +40,7 @@ public class Cliente {
     }
 
     public void setIdade(int idade) {
-        if (idade >= 0) {
+        if (idade >= 0) { // Verificação básica de idade não negativa
             this.idade = idade;
         } else {
             throw new IllegalArgumentException("A idade deve ser um valor não negativo.");
@@ -55,6 +52,7 @@ public class Cliente {
     }
 
     public void setEmail(String email) {
+        // Verificação básica de formato de e-mail
         if (email.contains("@") && email.contains(".")) {
             this.email = email;
         } else {
@@ -67,6 +65,7 @@ public class Cliente {
     }
 
     public void setTipo(int tipo) {
+        // Adicionar validação de tipo, se necessário
         this.tipo = tipo;
     }
 
@@ -76,36 +75,5 @@ public class Cliente {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
-    }
-
-    public void salvarNoBanco(Connection connection) throws SQLException {
-        String sql = "INSERT INTO Cliente (id, nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            statement.setString(2, nome);
-            statement.setInt(3, idade);
-            statement.setString(4, email);
-            statement.setInt(5, tipo);
-            statement.setBoolean(6, ativo);
-            statement.executeUpdate();
-        }
-    }
-
-    public static Cliente carregarDoBanco(int id, Connection connection) throws SQLException {
-        String sql = "SELECT * FROM Cliente WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    String nome = resultSet.getString("nome");
-                    int idade = resultSet.getInt("idade");
-                    String email = resultSet.getString("email");
-                    int tipo = resultSet.getInt("tipo");
-                    boolean ativo = resultSet.getBoolean("ativo");
-                    return new Cliente(id, nome, idade, email, tipo, ativo);
-                }
-            }
-        }
-        return null;
     }
 }

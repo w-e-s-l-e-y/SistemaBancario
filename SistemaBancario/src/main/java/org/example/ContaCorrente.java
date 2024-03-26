@@ -1,12 +1,8 @@
 package org.example;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class ContaCorrente {
-    private static final double SALDO_MINIMO = 100.0;
+    private static final double SALDO_MINIMO = 100.0; // Defina o saldo mínimo aceito para abrir uma conta
 
     private int id;
     private double saldo;
@@ -24,16 +20,13 @@ public class ContaCorrente {
         this.ativa = ativa;
     }
 
-    public static ContaCorrente abrirContaComDeposito(int id, double saldoInicial, Connection connection) throws SQLException {
-        if (saldoInicial < SALDO_MINIMO) {
+    // Método para abrir a conta com depósito obrigatório
+    public static ContaCorrente abrirContaComDeposito(int id, double saldoInicial) {
+        if (saldoInicial < SALDO_MINIMO) { // Verifica se o saldo inicial atende ao limite mínimo
             throw new IllegalArgumentException("O saldo inicial deve ser igual ou superior a " + SALDO_MINIMO);
         }
-
-        ContaCorrente conta = new ContaCorrente(id, saldoInicial, true);
-        conta.salvarNoBanco(connection);
-        return conta;
+        return new ContaCorrente(id, saldoInicial, true);
     }
-
     public int getId() {
         return id;
     }
@@ -111,28 +104,7 @@ public class ContaCorrente {
         saldo += valor;
     }
 
-    public void salvarNoBanco(Connection connection) throws SQLException {
-        String sql = "INSERT INTO ContaCorrente (id, saldo, ativa) VALUES (?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            statement.setDouble(2, saldo);
-            statement.setBoolean(3, ativa);
-            statement.executeUpdate();
-        }
-    }
-
-    public static ContaCorrente carregarDoBanco(int id, Connection connection) throws SQLException {
-        String sql = "SELECT * FROM ContaCorrente WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    double saldo = resultSet.getDouble("saldo");
-                    boolean ativa = resultSet.getBoolean("ativa");
-                    return new ContaCorrente(id, saldo, ativa);
-                }
-            }
-        }
-        return null;
+    public int getNumero() {
+        return id;
     }
 }

@@ -3,9 +3,7 @@ package org.example;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,21 +12,6 @@ import java.util.List;
  */
 public class GerenciadoraContasTest_Ex4 {
     private GerenciadoraContas gerContas;
-    private Connection connection;
-
-    /**
-     * Método para estabelecer a conexão com o banco de dados antes de cada teste.
-     */
-    public void setUp() {
-        // Estabelecer a conexão com o banco de dados SQLite
-        String url = "jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
-        try {
-            connection = DriverManager.getConnection(url);
-            gerContas = new GerenciadoraContas(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Teste básico da transferência de um valor da conta de um cliente para outro,
@@ -37,33 +20,22 @@ public class GerenciadoraContasTest_Ex4 {
     @Test
     public void testTransfereValor() {
         /* Montagem do cenário */
-        setUp(); // Configurar a conexão com o banco de dados
-
         // Criando algumas contas correntes
         ContaCorrente conta01 = new ContaCorrente(1, 200, true);
         ContaCorrente conta02 = new ContaCorrente(2, 0, true);
 
-        try {
-            gerContas.adicionarConta(conta01);
-            gerContas.adicionarConta(conta02);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Inserindo as contas criadas na lista de contas do banco
+        List<ContaCorrente> contasDoBanco = new ArrayList<>();
+        contasDoBanco.add(conta01);
+        contasDoBanco.add(conta02);
+
+        gerContas = new GerenciadoraContas(contasDoBanco);
 
         /* Execução */
-        boolean sucesso = false;
-        try {
-            sucesso = gerContas.transferir(1, 2, 100);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        boolean sucesso = gerContas.transferir(1, 2, 100); // Aqui a chamada correta do método é transferir, não transfereValor
 
         /* Verificações */
         assertTrue(sucesso);
-        try {
-            assertEquals(100.0, gerContas.verificarSaldo(2), 0);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        assertThat(conta02.getSaldo(), is(100.0));
     }
 }
