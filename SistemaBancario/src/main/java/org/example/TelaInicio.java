@@ -36,7 +36,26 @@ public class TelaInicio extends JFrame implements ActionListener {
 
     private void abrirTelaLogin() {
         TelaLogin telaLogin = new TelaLogin();
+        telaLogin.addLoginListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (telaLogin.isLoginSuccessful()) {
+                    fecharTelaInicio(); // Fechar a tela de início
+                    abrirInterfacePrincipal();
+                    telaLogin.dispose(); // Fecha a tela de login após o login bem-sucedido
+                }
+            }
+        });
         telaLogin.setVisible(true);
+    }
+
+    private void fecharTelaInicio() {
+        dispose(); // Fecha a tela de início
+    }
+
+    private void abrirInterfacePrincipal() {
+        InterfacePrincipal interfacePrincipal = new InterfacePrincipal();
+        interfacePrincipal.setVisible(true);
     }
 
     private void abrirTelaCadastro() {

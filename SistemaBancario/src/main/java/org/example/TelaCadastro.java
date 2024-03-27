@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class TelaCadastro extends JFrame implements ActionListener {
@@ -52,22 +53,33 @@ public class TelaCadastro extends JFrame implements ActionListener {
 
             // Estabelecer a conexão com o banco de dados SQLite
             try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
-                // Criar a instrução SQL para inserir um novo cliente
-                String sql = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
-
-                // Preparar a declaração SQL
-                try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                    // Definir os parâmetros da declaração SQL
+                // Inserir o cliente na tabela Cliente
+                String sqlCliente = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
+                try (PreparedStatement statement = connection.prepareStatement(sqlCliente, PreparedStatement.RETURN_GENERATED_KEYS)) {
                     statement.setString(1, nome);
                     statement.setInt(2, idade);
                     statement.setString(3, email);
                     statement.setInt(4, tipo);
                     statement.setBoolean(5, true); // Supondo que o cliente é sempre cadastrado como ativo
 
-                    // Executar a instrução SQL
+                    // Executar a instrução SQL para inserir o cliente
                     int rowsInserted = statement.executeUpdate();
                     if (rowsInserted > 0) {
+                        // Recuperar o id do cliente recém-inserido
+                        ResultSet generatedKeys = statement.getGeneratedKeys();
+                        if (generatedKeys.next()) {
+                            int clienteId = generatedKeys.getInt(1);
+                            // Inserir uma nova conta associada ao cliente na tabela Conta
+                            String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id) VALUES (?, ?, ?)";
+                            try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta)) {
+                                contaStatement.setDouble(1, 100); // Saldo inicial 0
+                                contaStatement.setBoolean(2, true); // Conta ativa
+                                contaStatement.setInt(3, clienteId); // Id do cliente
+                                contaStatement.executeUpdate();
+                            }
+                        }
                         JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!");
+                        this.dispose(); // Fechar a tela de cadastro
                     } else {
                         JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente.");
                     }
