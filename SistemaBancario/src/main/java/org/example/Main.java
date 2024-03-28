@@ -1,17 +1,22 @@
 package org.example;
 
+import javax.swing.*;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
-        // Criar o banco de dados se ele não existir
-        criarBancoSeNecessario();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                // Criar o banco de dados se ele não existir
+                criarBancoSeNecessario();
 
-        // Restante do código...
+                // Criar e exibir a tela de início
+                new TelaInicio().setVisible(true);
+            }
+        });
     }
 
     private static void criarBancoSeNecessario() {
@@ -59,7 +64,7 @@ public class Main {
                 "ativo BOOLEAN NOT NULL" +
                 ")";
 
-        try (Statement statement = connection.createStatement()) {
+        try (java.sql.Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
         }
     }
@@ -73,7 +78,7 @@ public class Main {
                 "FOREIGN KEY (cliente_id) REFERENCES Cliente(id)" +
                 ")";
 
-        try (Statement statement = connection.createStatement()) {
+        try (java.sql.Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
         }
     }
