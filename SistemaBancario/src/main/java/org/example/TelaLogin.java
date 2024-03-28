@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +15,13 @@ public class TelaLogin extends JFrame implements ActionListener {
     private JTextField campoNome;
     private JTextField campoNumeroConta;
     private JButton btnConfirmar;
+    private JLabel lblStatus;
     private boolean loginSuccessful = false;
     private List<ActionListener> loginListeners = new ArrayList<>();
 
     public TelaLogin() {
         setTitle("Login");
-        setSize(300, 200);
+        setSize(300, 250); // Aumenta o tamanho da janela
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // Centraliza a janela na tela
 
@@ -69,6 +69,10 @@ public class TelaLogin extends JFrame implements ActionListener {
         panelBotao.add(btnConfirmar);
         panelPrincipal.add(panelBotao, BorderLayout.SOUTH);
 
+        // Cria um JLabel para exibir o status do login
+        lblStatus = new JLabel();
+        panelPrincipal.add(lblStatus, BorderLayout.NORTH);
+
         // Adiciona o painel principal à janela
         add(panelPrincipal);
     }
@@ -83,11 +87,12 @@ public class TelaLogin extends JFrame implements ActionListener {
                 if (validarNumeroConta(numeroConta)) {
                     // Se o número da conta for válido, define o login como bem-sucedido
                     loginSuccessful = true;
+                    lblStatus.setText("Logado com sucesso!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Número da conta inválido.");
+                    lblStatus.setText("Número da conta inválido.");
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Digite um número de conta.");
+                lblStatus.setText("Digite um número de conta.");
             }
             notificarListeners();
         }

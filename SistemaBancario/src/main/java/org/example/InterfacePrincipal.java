@@ -98,7 +98,7 @@ public class InterfacePrincipal extends JFrame {
 
     private void atualizarSaldoBancoDados() {
         // Atualiza o saldo no banco de dados
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "UPDATE ContaCorrente SET saldo = ? WHERE id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, conta.getSaldo());

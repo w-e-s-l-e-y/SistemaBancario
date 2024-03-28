@@ -96,6 +96,7 @@ public class TelaInicio extends JFrame implements ActionListener {
                         fecharTelaInicio(); // Fechar a tela de início
                         abrirInterfacePrincipal(conta); // Passa a instância válida de ContaCorrente
                         telaLogin.dispose(); // Fecha a tela de login após o login bem-sucedido
+                        JOptionPane.showMessageDialog(null, "Logado com sucesso!");
                     } else {
                         JOptionPane.showMessageDialog(null, "Nome ou número da conta inválidos.");
                     }
@@ -106,7 +107,7 @@ public class TelaInicio extends JFrame implements ActionListener {
     }
 
     private ContaCorrente obterContaDoBancoDeDados(String nome, int numeroConta) {
-        String url = "jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
+        String url = "jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
         try (Connection connection = DriverManager.getConnection(url)) {
             String sql = "SELECT id, saldo, ativa " +
                     "FROM ContaCorrente " +

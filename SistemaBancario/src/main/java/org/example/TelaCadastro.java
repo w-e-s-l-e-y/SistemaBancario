@@ -85,7 +85,7 @@ public class TelaCadastro extends JFrame implements ActionListener {
             int tipo = Integer.parseInt(campoTipo.getText());
 
             // Estabelecer a conexão com o banco de dados SQLite C:\Users\fluib\Documents\GitHub\senac\SistemaBancario\SistemaBancario\src\main\java\org\example
-            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
                 // Inserir o cliente na tabela Cliente
                 String sqlCliente = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(sqlCliente, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -104,15 +104,21 @@ public class TelaCadastro extends JFrame implements ActionListener {
                             int clienteId = generatedKeys.getInt(1);
                             // Inserir uma nova conta associada ao cliente na tabela Conta
                             String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id) VALUES (?, ?, ?)";
-                            try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta)) {
+                            try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta, PreparedStatement.RETURN_GENERATED_KEYS)) {
                                 contaStatement.setDouble(1, 100); // Saldo inicial 0
                                 contaStatement.setBoolean(2, true); // Conta ativa
                                 contaStatement.setInt(3, clienteId); // Id do cliente
-                                contaStatement.executeUpdate();
+                                int contaInserted = contaStatement.executeUpdate();
+                                if (contaInserted > 0) {
+                                    ResultSet contaGeneratedKeys = contaStatement.getGeneratedKeys();
+                                    if (contaGeneratedKeys.next()) {
+                                        int contaId = contaGeneratedKeys.getInt(1);
+                                        JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso! O número da conta é: " + contaId);
+                                        this.dispose(); // Fechar a tela de cadastro
+                                    }
+                                }
                             }
                         }
-                        JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso!");
-                        this.dispose(); // Fechar a tela de cadastro
                     } else {
                         JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente.");
                     }
