@@ -21,7 +21,7 @@ public class Main {
 
     private static void criarBancoSeNecessario() {
         // Definir o caminho para o banco de dados SQLite
-        String path = "E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db"; // Substitua pelo caminho desejado
+        String path = "C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db"; // Substitua pelo caminho desejado
 
         // Verificar se o banco de dados já existe
         File dbFile = new File(path);

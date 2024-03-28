@@ -23,19 +23,54 @@ public class TelaLogin extends JFrame implements ActionListener {
         setTitle("Login");
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null); // Centraliza a janela na tela
 
+        // Adiciona uma margem ao redor do painel principal
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Adiciona margens de 20px em todos os lados
+
+        // Define um painel para os campos de entrada com GridLayout
+        JPanel panelCampos = new JPanel(new GridBagLayout()); // Layout gerenciado pelo GridBagLayout para controle mais preciso
+
+        // Cria um GridBagConstraints para configurar o posicionamento dos componentes
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // Adiciona margens de 5px em todos os lados
+
+        // Adiciona rótulos e campos de entrada ao painel de campos
+        JLabel labelNome = new JLabel("Nome:");
         campoNome = new JTextField(20);
+        campoNome.setColumns(10); // Define a largura do campo
+        campoNome.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Adiciona uma borda preta ao redor do campo
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panelCampos.add(labelNome, gbc);
+
+        gbc.gridx = 1;
+        panelCampos.add(campoNome, gbc);
+
+        JLabel labelNumeroConta = new JLabel("Número da Conta:");
         campoNumeroConta = new JTextField(20);
+        campoNumeroConta.setColumns(10); // Define a largura do campo
+        campoNumeroConta.setBorder(BorderFactory.createLineBorder(Color.BLACK)); // Adiciona uma borda preta ao redor do campo
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panelCampos.add(labelNumeroConta, gbc);
+
+        gbc.gridx = 1;
+        panelCampos.add(campoNumeroConta, gbc);
+
+        // Adiciona o painel de campos ao painel principal
+        panelPrincipal.add(panelCampos, BorderLayout.CENTER);
+
+        // Cria um painel para o botão de confirmação e adiciona ao painel principal
+        JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnConfirmar = new JButton("Confirmar");
-
-        setLayout(new GridLayout(3, 1));
-        add(new JLabel("Nome:"));
-        add(campoNome);
-        add(new JLabel("Número da Conta:"));
-        add(campoNumeroConta);
-        add(btnConfirmar);
-
         btnConfirmar.addActionListener(this);
+        panelBotao.add(btnConfirmar);
+        panelPrincipal.add(panelBotao, BorderLayout.SOUTH);
+
+        // Adiciona o painel principal à janela
+        add(panelPrincipal);
     }
 
     @Override

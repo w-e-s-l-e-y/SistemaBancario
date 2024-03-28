@@ -27,6 +27,13 @@ public class InterfacePrincipal extends JFrame {
         JButton btnDeposito = new JButton("Depósito");
         JButton btnSaque = new JButton("Saque");
 
+        // Estilização dos componentes
+        lblSaldo.setFont(new Font("Arial", Font.BOLD, 16));
+        btnDeposito.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnSaque.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnDeposito.setBackground(new Color(152, 251, 152)); // Verde claro
+        btnSaque.setBackground(new Color(255, 182, 193)); // Rosa claro
+
         // Adicionando ações aos botões
         btnDeposito.addActionListener(new ActionListener() {
             @Override
@@ -42,9 +49,13 @@ public class InterfacePrincipal extends JFrame {
             }
         });
 
-        // Adicionando componentes ao painel principal
+        // Estilizando borda
+        lblSaldo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Adicionando componentes ao painel principal com espaçamento
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 1));
+        panel.setLayout(new GridLayout(3, 1, 10, 10)); // Espaçamento entre os componentes
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Espaçamento das bordas
         panel.add(lblSaldo);
         panel.add(btnDeposito);
         panel.add(btnSaque);
@@ -87,7 +98,7 @@ public class InterfacePrincipal extends JFrame {
 
     private void atualizarSaldoBancoDados() {
         // Atualiza o saldo no banco de dados
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "UPDATE ContaCorrente SET saldo = ? WHERE id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, conta.getSaldo());

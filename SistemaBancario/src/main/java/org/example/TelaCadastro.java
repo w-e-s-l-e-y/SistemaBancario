@@ -19,27 +19,60 @@ public class TelaCadastro extends JFrame implements ActionListener {
 
     public TelaCadastro() {
         setTitle("Cadastro de Cliente");
-        setSize(300, 250);
+        setSize(400, 300); // Aumenta o tamanho da janela
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null); // Centraliza a janela na tela
 
+        // Adiciona uma margem ao redor do painel principal
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Adiciona margens de 20px em todos os lados
+
+        // Define um painel para os campos de entrada com GridBagLayout
+        JPanel panelCampos = new JPanel(new GridBagLayout());
+
+        // Adiciona rótulos e campos de entrada ao painel de campos usando GridBagLayout
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5); // Adiciona um espaço de 5px entre os componentes
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panelCampos.add(new JLabel("Nome:"), gbc);
+        gbc.gridy++;
+        panelCampos.add(new JLabel("Idade:"), gbc);
+        gbc.gridy++;
+        panelCampos.add(new JLabel("Email:"), gbc);
+        gbc.gridy++;
+        panelCampos.add(new JLabel("Tipo:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         campoNome = new JTextField(20);
+        panelCampos.add(campoNome, gbc);
+        gbc.gridy++;
         campoIdade = new JTextField(20);
+        panelCampos.add(campoIdade, gbc);
+        gbc.gridy++;
         campoEmail = new JTextField(20);
+        panelCampos.add(campoEmail, gbc);
+        gbc.gridy++;
         campoTipo = new JTextField(20);
+        panelCampos.add(campoTipo, gbc);
+
+        // Adiciona o painel de campos ao painel principal
+        panelPrincipal.add(panelCampos, BorderLayout.CENTER);
+
+        // Cria um painel para o botão de cadastro e adiciona ao painel principal
+        JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnCadastrar = new JButton("Cadastrar");
-
-        setLayout(new GridLayout(5, 1));
-        add(new JLabel("Nome:"));
-        add(campoNome);
-        add(new JLabel("Idade:"));
-        add(campoIdade);
-        add(new JLabel("Email:"));
-        add(campoEmail);
-        add(new JLabel("Tipo:"));
-        add(campoTipo);
-        add(btnCadastrar);
-
         btnCadastrar.addActionListener(this);
+        panelBotao.add(btnCadastrar);
+        panelPrincipal.add(panelBotao, BorderLayout.SOUTH);
+
+        // Define a cor de fundo do painel principal
+        panelPrincipal.setBackground(Color.lightGray);
+
+        // Adiciona o painel principal à janela
+        add(panelPrincipal);
     }
 
     @Override
@@ -51,8 +84,8 @@ public class TelaCadastro extends JFrame implements ActionListener {
             String email = campoEmail.getText();
             int tipo = Integer.parseInt(campoTipo.getText());
 
-            // Estabelecer a conexão com o banco de dados SQLite
-            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+            // Estabelecer a conexão com o banco de dados SQLite C:\Users\fluib\Documents\GitHub\senac\SistemaBancario\SistemaBancario\src\main\java\org\example
+            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
                 // Inserir o cliente na tabela Cliente
                 String sqlCliente = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(sqlCliente, PreparedStatement.RETURN_GENERATED_KEYS)) {

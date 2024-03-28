@@ -15,19 +15,59 @@ public class TelaInicio extends JFrame implements ActionListener {
     private JButton btnCadastro;
 
     public TelaInicio() {
-        setTitle("Tela Inicial");
-        setSize(300, 200);
+        setTitle("Banco WYK");
+        setSize(400, 300); // Ajusta o tamanho da janela
+        setLocationRelativeTo(null); // Centraliza a janela na tela
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Adiciona um JLabel com o texto "Bem vindo ao Banco WYK" em caixa alta
+        JLabel lblBemVindo = new JLabel("BEM VINDO AO BANCO WYK");
+        lblBemVindo.setHorizontalAlignment(SwingConstants.CENTER); // Centraliza o texto
+        lblBemVindo.setFont(lblBemVindo.getFont().deriveFont(Font.BOLD, 18f)); // Define a fonte em negrito e tamanho 18
 
         btnLogin = new JButton("Login");
         btnCadastro = new JButton("Cadastro");
 
-        setLayout(new GridLayout(2, 1));
-        add(btnLogin);
-        add(btnCadastro);
+        // Cria um JPanel para o título e os botões
+        JPanel panelPrincipal = new JPanel();
+        panelPrincipal.setLayout(new GridBagLayout()); // Usando GridBagLayout para melhor controle de posicionamento
 
+        // Adiciona o JLabel ao JPanel
+        GridBagConstraints gbcLabel = new GridBagConstraints();
+        gbcLabel.gridx = 0;
+        gbcLabel.gridy = 0;
+        gbcLabel.gridwidth = 1;
+        gbcLabel.gridheight = 1;
+        gbcLabel.weightx = 1.0;
+        gbcLabel.weighty = 0.5;
+        gbcLabel.fill = GridBagConstraints.HORIZONTAL;
+        panelPrincipal.add(lblBemVindo, gbcLabel);
+
+        // Adiciona o JPanel com os botões ao JPanel principal
+        GridBagConstraints gbcBotoes = new GridBagConstraints();
+        gbcBotoes.gridx = 0;
+        gbcBotoes.gridy = 1;
+        gbcBotoes.gridwidth = 1;
+        gbcBotoes.gridheight = 1;
+        gbcBotoes.weightx = 1.0;
+        gbcBotoes.weighty = 0.5;
+        gbcBotoes.fill = GridBagConstraints.HORIZONTAL;
+        panelPrincipal.add(criarPainelBotoes(), gbcBotoes);
+
+        // Adiciona o panelPrincipal à janela
+        add(panelPrincipal);
+
+        // Adiciona ActionListener aos botões
         btnLogin.addActionListener(this);
         btnCadastro.addActionListener(this);
+    }
+
+    // Método para criar o JPanel com os botões
+    private JPanel criarPainelBotoes() {
+        JPanel panelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelBotoes.add(btnLogin);
+        panelBotoes.add(btnCadastro);
+        return panelBotoes;
     }
 
     @Override
@@ -66,7 +106,7 @@ public class TelaInicio extends JFrame implements ActionListener {
     }
 
     private ContaCorrente obterContaDoBancoDeDados(String nome, int numeroConta) {
-        String url = "jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
+        String url = "jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
         try (Connection connection = DriverManager.getConnection(url)) {
             String sql = "SELECT id, saldo, ativa " +
                     "FROM ContaCorrente " +
