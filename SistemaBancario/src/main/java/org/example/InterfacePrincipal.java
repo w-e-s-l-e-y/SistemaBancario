@@ -58,7 +58,7 @@ public class InterfacePrincipal extends JFrame {
         if (valorStr != null && !valorStr.isEmpty()) {
             try {
                 double valor = Double.parseDouble(valorStr);
-                conta.depositar(valor); // Atualiza o saldo na classe Conta
+                conta.depositar(valor); // Atualiza o saldo na classe ContaCorrente
                 atualizarSaldoBancoDados(); // Atualiza o saldo no banco de dados
                 lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
                 JOptionPane.showMessageDialog(this, "Depósito de R$ " + valor + " realizado com sucesso.");
@@ -73,7 +73,7 @@ public class InterfacePrincipal extends JFrame {
         if (valorStr != null && !valorStr.isEmpty()) {
             try {
                 double valor = Double.parseDouble(valorStr);
-                conta.sacar(valor); // Atualiza o saldo na classe Conta
+                conta.sacar(valor); // Atualiza o saldo na classe ContaCorrente
                 atualizarSaldoBancoDados(); // Atualiza o saldo no banco de dados
                 lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
                 JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
@@ -87,8 +87,8 @@ public class InterfacePrincipal extends JFrame {
 
     private void atualizarSaldoBancoDados() {
         // Atualiza o saldo no banco de dados
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:seu_banco_de_dados.db")) {
-            String sql = "UPDATE Conta SET saldo = ? WHERE id = ?";
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+            String sql = "UPDATE ContaCorrente SET saldo = ? WHERE id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, conta.getSaldo());
                 statement.setInt(2, conta.getId());
