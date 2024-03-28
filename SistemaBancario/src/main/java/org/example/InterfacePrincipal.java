@@ -10,10 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class InterfacePrincipal extends JFrame {
-    private Conta conta; // Instância da classe Conta
+    private ContaCorrente conta; // Instância da classe Conta
     private JLabel lblSaldo;
 
-    public InterfacePrincipal() {
+    public InterfacePrincipal(ContaCorrente conta) {
         this.conta = conta;
 
         // Configurações básicas da janela
@@ -58,7 +58,7 @@ public class InterfacePrincipal extends JFrame {
         if (valorStr != null && !valorStr.isEmpty()) {
             try {
                 double valor = Double.parseDouble(valorStr);
-                conta.creditar(valor); // Atualiza o saldo na classe Conta
+                conta.depositar(valor); // Atualiza o saldo na classe Conta
                 atualizarSaldoBancoDados(); // Atualiza o saldo no banco de dados
                 lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
                 JOptionPane.showMessageDialog(this, "Depósito de R$ " + valor + " realizado com sucesso.");
@@ -73,7 +73,7 @@ public class InterfacePrincipal extends JFrame {
         if (valorStr != null && !valorStr.isEmpty()) {
             try {
                 double valor = Double.parseDouble(valorStr);
-                conta.debitar(valor); // Atualiza o saldo na classe Conta
+                conta.sacar(valor); // Atualiza o saldo na classe Conta
                 atualizarSaldoBancoDados(); // Atualiza o saldo no banco de dados
                 lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
                 JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
@@ -88,10 +88,10 @@ public class InterfacePrincipal extends JFrame {
     private void atualizarSaldoBancoDados() {
         // Atualiza o saldo no banco de dados
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:seu_banco_de_dados.db")) {
-            String sql = "UPDATE Conta SET saldo = ? WHERE numero = ?";
+            String sql = "UPDATE Conta SET saldo = ? WHERE id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, conta.getSaldo());
-                statement.setInt(2, conta.getNumero());
+                statement.setInt(2, conta.getId());
                 statement.executeUpdate();
             }
         } catch (SQLException ex) {
@@ -103,8 +103,8 @@ public class InterfacePrincipal extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 // Exemplo de uso da InterfacePrincipal com uma Conta
-                Conta conta = new Conta(123, 1000.0); // Número da conta e saldo inicial
-                new InterfacePrincipal().setVisible(true);
+                ContaCorrente conta = new ContaCorrente(123, 1000.0, true); // Número da conta, saldo inicial e status da conta
+                new InterfacePrincipal(conta).setVisible(true);
             }
         });
     }
