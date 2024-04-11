@@ -107,4 +107,12 @@ public class ContaCorrente {
     public int getNumero() {
         return id;
     }
+
+    public int getNumeroConta() {
+        return id;
+    }
 }
+
+
+
+
