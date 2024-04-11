@@ -9,7 +9,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class InterfacePrincipal extends JFrame {
+public class
+InterfacePrincipal extends JFrame {
     private ContaCorrente conta; // Instância da classe Conta
     private JLabel lblSaldo;
 

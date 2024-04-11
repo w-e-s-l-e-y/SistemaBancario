@@ -84,8 +84,11 @@ public class TelaCadastro extends JFrame implements ActionListener {
             String email = campoEmail.getText();
             int tipo = Integer.parseInt(campoTipo.getText());
 
-            // Estabelecer a conexão com o banco de dados SQLite C:\Users\fluib\Documents\GitHub\senac\SistemaBancario\SistemaBancario\src\main\java\org\example
-            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+            // Obter o caminho do banco de dados do arquivo config.properties
+            String url = Main.obterCaminhoBancoDados();
+
+            // Estabelecer a conexão com o banco de dados SQLite
+            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + url)) {
                 // Inserir o cliente na tabela Cliente
                 String sqlCliente = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement statement = connection.prepareStatement(sqlCliente, PreparedStatement.RETURN_GENERATED_KEYS)) {

@@ -14,6 +14,11 @@ public class TelaInicio extends JFrame implements ActionListener {
     private JButton btnLogin;
     private JButton btnCadastro;
 
+    // Método para obter a conexão com o banco de dados usando o caminho fornecido
+    private Connection conectarAoBancoDeDados(String url) throws SQLException {
+        return DriverManager.getConnection(url);
+    }
+
     public TelaInicio() {
         setTitle("Banco WYK");
         setSize(400, 300); // Ajusta o tamanho da janela
@@ -106,9 +111,10 @@ public class TelaInicio extends JFrame implements ActionListener {
         telaLogin.setVisible(true);
     }
 
+    // Método para obter uma ContaCorrente do banco de dados
     private ContaCorrente obterContaDoBancoDeDados(String nome, int numeroConta) {
-        String url = "jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
-        try (Connection connection = DriverManager.getConnection(url)) {
+        String url = Main.obterCaminhoBancoDados();
+        try (Connection connection = conectarAoBancoDeDados(url)) {
             String sql = "SELECT id, saldo, ativa " +
                     "FROM ContaCorrente " +
                     "WHERE cliente_id = (SELECT id FROM Cliente WHERE nome = ?) " +
@@ -126,11 +132,12 @@ public class TelaInicio extends JFrame implements ActionListener {
                 }
             }
         } catch (SQLException ex) {
-            ex.printStackTrace(); // Adiciona essa linha para imprimir o stack trace da exceção
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erro ao consultar o banco de dados: " + ex.getMessage());
         }
         return null;
     }
+
 
     private void fecharTelaInicio() {
         dispose(); // Fecha a tela de início
