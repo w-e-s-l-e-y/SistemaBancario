@@ -1,38 +1,53 @@
 package org.example;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import static org.example.InterfacePrincipal.atualizarSaldoBancoDados;
 
 public class ContaCorrente {
-    private static final double SALDO_MINIMO = 100.0; // Defina o saldo mínimo aceito para abrir uma conta
+    private static final double SALDO_MINIMO = 100.0;
+    private static final double CHEQUE_ESPECIAL_INICIAL = 100.0;
 
     private int id;
     private double saldo;
+    private double chequeEspecial;
     private boolean ativa;
 
     public ContaCorrente(int id, double saldoInicial, boolean ativa) {
         if (id <= 0) {
             throw new IllegalArgumentException("O ID da conta deve ser maior que zero.");
         }
-        if (saldoInicial < 0) {
-            throw new IllegalArgumentException("O saldo inicial não pode ser negativo.");
-        }
         this.id = id;
         this.saldo = saldoInicial;
+        this.chequeEspecial = CHEQUE_ESPECIAL_INICIAL;
         this.ativa = ativa;
     }
 
     // Método para abrir a conta com depósito obrigatório
     public static ContaCorrente abrirContaComDeposito(int id, double saldoInicial) {
-        if (saldoInicial < SALDO_MINIMO) { // Verifica se o saldo inicial atende ao limite mínimo
+        if (saldoInicial < SALDO_MINIMO) {
             throw new IllegalArgumentException("O saldo inicial deve ser igual ou superior a " + SALDO_MINIMO);
         }
         return new ContaCorrente(id, saldoInicial, true);
     }
+
     public int getId() {
         return id;
     }
 
     public double getSaldo() {
         return saldo;
+    }
+
+    public double getChequeEspecial() {
+        return chequeEspecial;
     }
 
     public boolean isAtiva() {
@@ -53,11 +68,20 @@ public class ContaCorrente {
         if (valor < 0) {
             throw new IllegalArgumentException("O valor a ser sacado não pode ser negativo.");
         }
-        if (valor > saldo) {
+        if (valor > saldo + chequeEspecial) {
             throw new IllegalArgumentException("Saldo insuficiente.");
         }
-        saldo -= valor;
+        if (valor > saldo) {
+            double valorDoChequeEspecial = valor - saldo;
+            saldo = 0;
+            chequeEspecial -= valorDoChequeEspecial;
+            saldo -= valorDoChequeEspecial; // Reduz o saldo da conta para refletir o uso do cheque especial
+            System.out.println("Foram removidos R$" + valorDoChequeEspecial + " do seu valor de cheque especial. Agora você tem R$" + chequeEspecial + " sobrando.");
+        } else {
+            saldo -= valor;
+        }
     }
+
 
     public void transferir(ContaCorrente destino, double valor) {
         if (!ativa) {
@@ -66,10 +90,16 @@ public class ContaCorrente {
         if (valor < 0) {
             throw new IllegalArgumentException("O valor a ser transferido não pode ser negativo.");
         }
-        if (valor > saldo) {
+        if (valor > saldo + chequeEspecial) {
             throw new IllegalArgumentException("Saldo insuficiente.");
         }
-        saldo -= valor;
+        if (valor > saldo) {
+            double valorDoChequeEspecial = valor - saldo;
+            saldo = 0;
+            chequeEspecial -= valorDoChequeEspecial;
+        } else {
+            saldo -= valor;
+        }
         destino.depositar(valor);
     }
 
@@ -88,11 +118,23 @@ public class ContaCorrente {
         if (valor < 0) {
             throw new IllegalArgumentException("O valor a ser debitado não pode ser negativo.");
         }
-        if (valor > saldo) {
+        if (valor > saldo + chequeEspecial) {
             throw new IllegalArgumentException("Saldo insuficiente.");
         }
-        saldo -= valor;
+
+        // Atualiza o saldo e o cheque especial
+        if (saldo < valor) {
+            double valorDoChequeEspecial = valor - saldo;
+            saldo = 0;
+            chequeEspecial -= valorDoChequeEspecial;
+        } else {
+            saldo -= valor;
+        }
+
+        // Atualiza o saldo no banco de dados
+        atualizarSaldoBancoDados(id, saldo, chequeEspecial);
     }
+
 
     public void creditar(double valor) {
         if (!ativa) {
@@ -112,7 +154,3 @@ public class ContaCorrente {
         return id;
     }
 }
-
-
-
-

@@ -80,9 +80,31 @@ public class InterfacePrincipal extends JFrame {
         if (valorStr != null && !valorStr.isEmpty()) {
             try {
                 double valor = Double.parseDouble(valorStr);
-                conta.depositar(valor); // Atualiza o saldo na classe ContaCorrente
-                double novoSaldo = conta.getSaldo(); // Correção: Definir o novo saldo
-                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo);// Atualiza o saldo no banco de dados
+
+                double saldoAnterior = conta.getSaldo();
+                double saldoPosterior = saldoAnterior + valor;
+
+                double novoChequeEspecial = conta.getChequeEspecial(); // Obtém o valor atual do cheque especial
+
+                if (saldoPosterior >= 0) {
+                    // Se o saldo após o depósito for maior ou igual a zero, ajuste para zero
+                    // e restaura o cheque especial para 100
+                    novoChequeEspecial = 100;
+                }
+
+                double valorDeposito = valor;
+                if (saldoPosterior < 0) {
+                    // Se o saldo após o depósito for menor que zero, ajuste o valor do depósito
+                    // para cobrir o saldo negativo
+                    valorDeposito = valor - saldoAnterior;
+                }
+
+                conta.depositar(valorDeposito); // Atualiza o saldo na classe ContaCorrente
+                double novoSaldo = conta.getSaldo(); // Obtém o novo saldo
+
+                // Atualiza o saldo e o cheque especial no banco de dados
+                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial);
+
                 lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
                 JOptionPane.showMessageDialog(this, "Depósito de R$ " + valor + " realizado com sucesso.");
             } catch (NumberFormatException ex) {
@@ -91,34 +113,62 @@ public class InterfacePrincipal extends JFrame {
         }
     }
 
+
     private void realizarSaque() {
         String valorStr = JOptionPane.showInputDialog("Digite o valor do saque:");
         if (valorStr != null && !valorStr.isEmpty()) {
+            double valor = 0;
+            double novoChequeEspecial = 0;
             try {
-                double valor = Double.parseDouble(valorStr);
+                valor = Double.parseDouble(valorStr);
+                // Verifica se o valor do saque é zero
+                if (valor == 0) {
+                    JOptionPane.showMessageDialog(this, "Valor inválido para saque.");
+                    return;
+                }
+                // Tenta realizar o saque
                 conta.sacar(valor); // Atualiza o saldo na classe ContaCorrente
                 double novoSaldo = conta.getSaldo(); // Correção: Definir o novo saldo
-                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo);// Atualiza o saldo no banco de dados
+                // Se o saque for bem-sucedido, atualiza o saldo no banco de dados
+                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial); // Atualiza o saldo no banco de dados
                 lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
                 JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Valor inválido.");
             } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage());
+                double valorFaltante = Double.parseDouble(valorStr) - conta.getSaldo();
+                // Verifica se o valor do saque ultrapassa o saldo e pode ser coberto pelo cheque especial
+                if (valorFaltante <= conta.getChequeEspecial()) {
+                    // Tenta utilizar o cheque especial para cobrir o saque
+                    double valorUtilizadoChequeEspecial = valor - conta.getSaldo();
+                    novoChequeEspecial = conta.getChequeEspecial() - valorUtilizadoChequeEspecial;
+                    conta.sacar(valorUtilizadoChequeEspecial); // Atualiza o saldo usando o cheque especial
+                    double novoSaldo = conta.getSaldo(); // Correção: Definir o novo saldo
+                    // Se o cheque especial for utilizado com sucesso, atualiza o saldo no banco de dados
+                    atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial); // Atualiza o saldo no banco de dados
+                    lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
+                    JOptionPane.showMessageDialog(this, "Saque de R$ " + valorStr + " realizado com sucesso utilizando o cheque especial.");
+                } else {
+                    JOptionPane.showMessageDialog(this, ex.getMessage());
+                }
             }
         }
     }
+
+
+
 
     private void abrirTelaTransferencia() {
         TelaTransferencia telaTransferencia = new TelaTransferencia(conta.getNumeroConta());
         telaTransferencia.setVisible(true);
 
-        // Passa a conta e o saldo atual para a tela de transferência
+        // Passa a conta, o saldo atual e o cheque especial para a tela de transferência
         telaTransferencia.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent windowEvent) {
                 double novoSaldo = telaTransferencia.getNovoSaldo();
-                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo); // Atualiza o saldo no banco de dados
+                double novoChequeEspecial = telaTransferencia.getNovoChequeEspecial(); // Obtém o novo valor do cheque especial
+                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial); // Atualiza o saldo e o cheque especial no banco de dados
                 lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
             }
         });
@@ -126,18 +176,20 @@ public class InterfacePrincipal extends JFrame {
 
 
 
-    public static void atualizarSaldoBancoDados(int numeroContaOrigem, double novoSaldo) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
-            String sql = "UPDATE ContaCorrente SET saldo = ? WHERE cliente_id = ?";
+    public static void atualizarSaldoBancoDados(int numeroContaOrigem, double novoSaldo, double novoChequeEspecial) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+            String sql = "UPDATE ContaCorrente SET saldo = ?, cheque_especial = ? WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, novoSaldo);
-                statement.setInt(2, numeroContaOrigem);
+                statement.setDouble(2, novoChequeEspecial);
+                statement.setInt(3, numeroContaOrigem);
                 statement.executeUpdate();
             }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Erro ao atualizar saldo no banco de dados: " + ex.getMessage());
         }
     }
+
 
 
     public static void main(String[] args) {

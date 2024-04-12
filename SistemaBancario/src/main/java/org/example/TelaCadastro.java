@@ -103,11 +103,12 @@ public class TelaCadastro extends JFrame implements ActionListener {
                         if (generatedKeys.next()) {
                             int clienteId = generatedKeys.getInt(1);
                             // Inserir uma nova conta associada ao cliente na tabela Conta
-                            String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id) VALUES (?, ?, ?)";
+                            String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id, cheque_especial) VALUES (?, ?, ?, ?)";
                             try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta, PreparedStatement.RETURN_GENERATED_KEYS)) {
                                 contaStatement.setDouble(1, 100); // Saldo inicial 0
                                 contaStatement.setBoolean(2, true); // Conta ativa
                                 contaStatement.setInt(3, clienteId); // Id do cliente
+                                contaStatement.setInt(4, 100); // cheque especial do cliente
                                 int contaInserted = contaStatement.executeUpdate();
                                 if (contaInserted > 0) {
                                     ResultSet contaGeneratedKeys = contaStatement.getGeneratedKeys();

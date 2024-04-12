@@ -76,7 +76,7 @@ public class TelaTransferencia extends JFrame {
     }
 
     private boolean verificarExistenciaConta(int numeroConta) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "SELECT * FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setInt(1, numeroConta);
@@ -90,7 +90,7 @@ public class TelaTransferencia extends JFrame {
     }
 
     private void transferir(int numeroContaOrigem, int numeroContaDestino, double valorTransferencia) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             // Verifica se há saldo suficiente na conta de origem
             String sqlSaldo = "SELECT saldo FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statementSaldo = connection.prepareStatement(sqlSaldo)) {
@@ -129,7 +129,7 @@ public class TelaTransferencia extends JFrame {
     public double getNovoSaldo() {
         double novoSaldo = 0.0;
 
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\fluib\\Documents\\GitHub\\senac\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "SELECT saldo FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setInt(1, numeroContaOrigem);
@@ -143,5 +143,13 @@ public class TelaTransferencia extends JFrame {
         }
 
         return novoSaldo;
+    }
+
+    public double getNovoChequeEspecial() {
+        // Aqui você deve implementar a lógica para obter o novo valor do cheque especial
+        // Este método será chamado pela InterfacePrincipal após a transferência
+        // Você pode acessar o banco de dados ou calcular o valor com base em outras informações disponíveis
+        // Retorne o novo valor do cheque especial
+        return 0.0;
     }
 }
