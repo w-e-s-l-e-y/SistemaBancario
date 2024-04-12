@@ -3,6 +3,7 @@ package org.example;
 public class Conta {
     private int numero;
     private double saldo;
+    private static final double LIMITE_CHEQUE_ESPECIAL = 100;
 
     public Conta(int numero, double saldoInicial) {
         if (numero <= 0) {
@@ -39,4 +40,28 @@ public class Conta {
         }
         saldo -= valor;
     }
+
+    public double retirarChequeEspecial(double valor) {
+        // Calcula o limite do cheque especial
+        double valorDisponivel = saldo + LIMITE_CHEQUE_ESPECIAL;
+
+        // Verifica se o valor de retirada excede o limite disponível
+        if (valor > valorDisponivel) {
+            throw new IllegalArgumentException("Valor de retirada excede o limite disponível.");
+        }
+
+        // Realiza a retirada do valor solicitado
+        saldo -= valor;
+
+        // Retorna o valor retirado em formato negativo se o saldo ficar negativo
+        if (saldo < 0) {
+            return -valor;
+        }
+
+        return valor;
+    }
+
+
+
+
 }
