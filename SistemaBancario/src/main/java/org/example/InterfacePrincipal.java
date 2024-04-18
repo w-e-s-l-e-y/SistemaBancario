@@ -84,13 +84,14 @@ public class InterfacePrincipal extends JFrame {
                 double saldoAnterior = conta.getSaldo();
                 double saldoPosterior = saldoAnterior + valor;
 
-                double novoChequeEspecial = conta.getChequeEspecial(); // Obtém o valor atual do cheque especial
+                double novoChequeEspecial = conta.getChequeEspecial();
 
                 if (saldoPosterior >= 0) {
-                    // Se o saldo após o depósito for maior ou igual a zero, ajuste para zero
-                    // e restaura o cheque especial para 100
-                    novoChequeEspecial = 100;
+                    // Se o saldo após o depósito for maior ou igual a zero, ajusta o cheque especial
+                    // para 1/3 do saldo após o depósito e mantém no máximo o valor atual do cheque especial
+                    novoChequeEspecial = Math.min(saldoPosterior / 3, novoChequeEspecial);
                 }
+
 
                 double valorDeposito = valor;
                 if (saldoPosterior < 0) {
@@ -114,11 +115,12 @@ public class InterfacePrincipal extends JFrame {
     }
 
 
+
+
     private void realizarSaque() {
         String valorStr = JOptionPane.showInputDialog("Digite o valor do saque:");
         if (valorStr != null && !valorStr.isEmpty()) {
             double valor = 0;
-            double novoChequeEspecial = 0;
             try {
                 valor = Double.parseDouble(valorStr);
                 // Verifica se o valor do saque é zero
@@ -126,34 +128,27 @@ public class InterfacePrincipal extends JFrame {
                     JOptionPane.showMessageDialog(this, "Valor inválido para saque.");
                     return;
                 }
+                // Verifica se o saldo é suficiente para o saque
+                if (valor > conta.getSaldo() + conta.getChequeEspecial()) {
+                    JOptionPane.showMessageDialog(this, "Saldo insuficiente.");
+                    return;
+                }
                 // Tenta realizar o saque
                 conta.sacar(valor); // Atualiza o saldo na classe ContaCorrente
-                double novoSaldo = conta.getSaldo(); // Correção: Definir o novo saldo
-                // Se o saque for bem-sucedido, atualiza o saldo no banco de dados
-                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial); // Atualiza o saldo no banco de dados
+                double novoSaldo = conta.getSaldo(); // Obtém o novo saldo
+                double novoChequeEspecial = conta.getChequeEspecial(); // Obtém o novo valor do cheque especial
+                // Se o saque for bem-sucedido, atualiza o saldo e o cheque especial no banco de dados
+                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial);
                 lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
                 JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Valor inválido.");
             } catch (IllegalArgumentException ex) {
-                double valorFaltante = Double.parseDouble(valorStr) - conta.getSaldo();
-                // Verifica se o valor do saque ultrapassa o saldo e pode ser coberto pelo cheque especial
-                if (valorFaltante <= conta.getChequeEspecial()) {
-                    // Tenta utilizar o cheque especial para cobrir o saque
-                    double valorUtilizadoChequeEspecial = valor - conta.getSaldo();
-                    novoChequeEspecial = conta.getChequeEspecial() - valorUtilizadoChequeEspecial;
-                    conta.sacar(valorUtilizadoChequeEspecial); // Atualiza o saldo usando o cheque especial
-                    double novoSaldo = conta.getSaldo(); // Correção: Definir o novo saldo
-                    // Se o cheque especial for utilizado com sucesso, atualiza o saldo no banco de dados
-                    atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial); // Atualiza o saldo no banco de dados
-                    lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
-                    JOptionPane.showMessageDialog(this, "Saque de R$ " + valorStr + " realizado com sucesso utilizando o cheque especial.");
-                } else {
-                    JOptionPane.showMessageDialog(this, ex.getMessage());
-                }
+                JOptionPane.showMessageDialog(this, ex.getMessage());
             }
         }
     }
+
 
 
 

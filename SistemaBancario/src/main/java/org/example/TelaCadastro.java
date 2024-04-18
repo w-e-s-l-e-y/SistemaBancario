@@ -15,11 +15,12 @@ public class TelaCadastro extends JFrame implements ActionListener {
     private JTextField campoIdade;
     private JTextField campoEmail;
     private JTextField campoTipo;
+    private JTextField campoSaldoInicial;
     private JButton btnCadastrar;
 
     public TelaCadastro() {
         setTitle("Cadastro de Cliente");
-        setSize(400, 300); // Aumenta o tamanho da janela
+        setSize(400, 350); // Aumenta o tamanho da janela
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // Centraliza a janela na tela
 
@@ -43,6 +44,13 @@ public class TelaCadastro extends JFrame implements ActionListener {
         panelCampos.add(new JLabel("Email:"), gbc);
         gbc.gridy++;
         panelCampos.add(new JLabel("Tipo:"), gbc);
+        gbc.gridy++;
+        panelCampos.add(new JLabel("Saldo Inicial:"), gbc);
+
+
+
+
+
 
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -57,6 +65,9 @@ public class TelaCadastro extends JFrame implements ActionListener {
         gbc.gridy++;
         campoTipo = new JTextField(20);
         panelCampos.add(campoTipo, gbc);
+        gbc.gridy++;
+        campoSaldoInicial = new JTextField(20);
+        panelCampos.add(campoSaldoInicial, gbc);
 
         // Adiciona o painel de campos ao painel principal
         panelPrincipal.add(panelCampos, BorderLayout.CENTER);
@@ -74,6 +85,12 @@ public class TelaCadastro extends JFrame implements ActionListener {
         // Adiciona o painel principal à janela
         add(panelPrincipal);
     }
+
+    // Cria um painel para o botão de cadastro e adiciona ao painel principal
+    JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -105,10 +122,10 @@ public class TelaCadastro extends JFrame implements ActionListener {
                             // Inserir uma nova conta associada ao cliente na tabela Conta
                             String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id, cheque_especial) VALUES (?, ?, ?, ?)";
                             try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                                contaStatement.setDouble(1, 100); // Saldo inicial 0
+                                contaStatement.setDouble(1, Double.parseDouble(campoSaldoInicial.getText())); // Saldo inicial 0
                                 contaStatement.setBoolean(2, true); // Conta ativa
                                 contaStatement.setInt(3, clienteId); // Id do cliente
-                                contaStatement.setInt(4, 100); // cheque especial do cliente
+                                contaStatement.setInt(4, (int) (Double.parseDouble(campoSaldoInicial.getText()) / 3)); // cheque especial do cliente
                                 int contaInserted = contaStatement.executeUpdate();
                                 if (contaInserted > 0) {
                                     ResultSet contaGeneratedKeys = contaStatement.getGeneratedKeys();
