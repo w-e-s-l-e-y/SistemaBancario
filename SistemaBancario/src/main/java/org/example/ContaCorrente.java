@@ -1,9 +1,6 @@
 package org.example;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,8 +9,8 @@ import java.sql.SQLException;
 import static org.example.InterfacePrincipal.atualizarSaldoBancoDados;
 
 public class ContaCorrente {
-    private static final double SALDO_MINIMO = 100.0;
-    private static final double CHEQUE_ESPECIAL_INICIAL = 100.0;
+    private static final double SALDO_MINIMO = 10.0;
+    private static final double PROPORCAO_CHEQUE_ESPECIAL = 1.0 / 3.0; // Proporção do saldo inicial para definir o cheque especial
 
     private int id;
     private double saldo;
@@ -26,7 +23,7 @@ public class ContaCorrente {
         }
         this.id = id;
         this.saldo = saldoInicial;
-        this.chequeEspecial = CHEQUE_ESPECIAL_INICIAL;
+        this.chequeEspecial = saldoInicial * PROPORCAO_CHEQUE_ESPECIAL; // Define o cheque especial como um terço do saldo inicial
         this.ativa = ativa;
     }
 
@@ -47,6 +44,11 @@ public class ContaCorrente {
     }
 
     public double getChequeEspecial() {
+        return chequeEspecial;
+    }
+
+    public double getNovoChequeEspecial() {
+        // Retorna o valor atual do cheque especial
         return chequeEspecial;
     }
 
@@ -81,6 +83,9 @@ public class ContaCorrente {
             saldo -= valor;
         }
     }
+
+
+
 
 
     public void transferir(ContaCorrente destino, double valor) {
@@ -118,22 +123,26 @@ public class ContaCorrente {
         if (valor < 0) {
             throw new IllegalArgumentException("O valor a ser debitado não pode ser negativo.");
         }
+
+        // Se o valor for maior que o saldo + cheque especial, lança uma exceção
         if (valor > saldo + chequeEspecial) {
             throw new IllegalArgumentException("Saldo insuficiente.");
         }
 
-        // Atualiza o saldo e o cheque especial
-        if (saldo < valor) {
+        // Primeiro, verifica se o saldo é suficiente para o débito
+        if (valor <= saldo) {
+            saldo -= valor;
+        } else {
+            // Se não for, utiliza o cheque especial
             double valorDoChequeEspecial = valor - saldo;
             saldo = 0;
             chequeEspecial -= valorDoChequeEspecial;
-        } else {
-            saldo -= valor;
         }
 
         // Atualiza o saldo no banco de dados
         atualizarSaldoBancoDados(id, saldo, chequeEspecial);
     }
+
 
 
     public void creditar(double valor) {

@@ -114,41 +114,45 @@ public class InterfacePrincipal extends JFrame {
         }
     }
 
-
-
-
     private void realizarSaque() {
         String valorStr = JOptionPane.showInputDialog("Digite o valor do saque:");
         if (valorStr != null && !valorStr.isEmpty()) {
-            double valor = 0;
-            try {
-                valor = Double.parseDouble(valorStr);
-                // Verifica se o valor do saque é zero
-                if (valor == 0) {
-                    JOptionPane.showMessageDialog(this, "Valor inválido para saque.");
-                    return;
-                }
-                // Verifica se o saldo é suficiente para o saque
-                if (valor > conta.getSaldo() + conta.getChequeEspecial()) {
+            double valor = Double.parseDouble(valorStr);
+            // Verifica se o valor do saque é positivo
+            if (valor <= 0) {
+                JOptionPane.showMessageDialog(this, "Valor inválido para saque.");
+                return;
+            }
+
+            // Calcula o saldo após o saque
+            double saldoAtual = conta.getSaldo();
+            double novoSaldo = saldoAtual - valor;
+
+            // Verifica se o saldo após o saque é suficiente
+            if (novoSaldo >= 0) {
+                // O saldo é suficiente, apenas atualiza o saldo na conta e no banco de dados
+                conta.sacar(valor);
+                atualizarSaldoBancoDados(conta.getNumeroConta(), conta.getSaldo(), conta.getChequeEspecial());
+                lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
+                JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
+            } else {
+                // O saldo não é suficiente, utiliza o cheque especial se disponível
+                double saldoRestante = Math.abs(novoSaldo);
+                if (saldoRestante > conta.getChequeEspecial()) {
                     JOptionPane.showMessageDialog(this, "Saldo insuficiente.");
                     return;
                 }
-                // Tenta realizar o saque
-                conta.sacar(valor); // Atualiza o saldo na classe ContaCorrente
-                double novoSaldo = conta.getSaldo(); // Obtém o novo saldo
-                double novoChequeEspecial = conta.getChequeEspecial(); // Obtém o novo valor do cheque especial
-                // Se o saque for bem-sucedido, atualiza o saldo e o cheque especial no banco de dados
-                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, novoChequeEspecial);
-                lblSaldo.setText("Saldo atual: R$ " + novoSaldo);
+                // Atualiza o saldo na conta e no banco de dados
+                double valorSaque = valor - saldoAtual; // Valor a ser sacado do cheque especial
+                conta.sacar(valorSaque);
+                double novoChequeEspecial = conta.getChequeEspecial() - valorSaque;
+                // Atualiza o saldo no banco de dados
+                atualizarSaldoBancoDados(conta.getNumeroConta(), conta.getSaldo(), novoChequeEspecial);
+                lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
                 JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Valor inválido.");
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage());
             }
         }
     }
-
 
 
 

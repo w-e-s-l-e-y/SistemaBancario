@@ -147,9 +147,24 @@ public class TelaTransferencia extends JFrame {
 
     public double getNovoChequeEspecial() {
         // Aqui você deve implementar a lógica para obter o novo valor do cheque especial
-        // Este método será chamado pela InterfacePrincipal após a transferência
-        // Você pode acessar o banco de dados ou calcular o valor com base em outras informações disponíveis
-        // Retorne o novo valor do cheque especial
-        return 0.0;
+        // Supondo que você tenha um objeto de ContaCorrente chamado "conta" para acessar os métodos de instância
+
+        double saldoAtual = this.getNovoSaldo(); // Obtém o saldo atual da conta
+        double chequeEspecialAtual = this.getChequeEspecial(); // Obtém o cheque especial atual da conta
+
+        // Verifica se o saldo atual é menor ou igual a zero
+        if (saldoAtual <= 0) {
+            // Se o saldo for menor ou igual a zero, o cheque especial será o valor absoluto do saldo atual
+            return Math.abs(saldoAtual);
+        } else {
+            // Se o saldo for positivo, retorna o cheque especial atual
+            return chequeEspecialAtual;
+        }
+    }
+
+    public double getChequeEspecial() {
+        // Lógica para obter o cheque especial da conta
+        // Você deve substituir esta implementação pela forma correta de obter o cheque especial da conta
+        return 0.0; // Implementação temporária
     }
 }
