@@ -26,7 +26,9 @@ public class TelaInicio extends JFrame implements ActionListener {
         lblBemVindo.setFont(lblBemVindo.getFont().deriveFont(Font.BOLD, 18f)); // Define a fonte em negrito e tamanho 18
 
         btnLogin = new JButton("Login");
+        btnLogin.setBackground(new Color (135, 206, 250));
         btnCadastro = new JButton("Cadastro");
+        btnCadastro.setBackground(new Color (135, 206, 250));
 
         // Cria um JPanel para o título e os botões
         JPanel panelPrincipal = new JPanel();

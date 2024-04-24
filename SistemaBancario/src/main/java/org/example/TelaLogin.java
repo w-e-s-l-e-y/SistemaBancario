@@ -65,6 +65,7 @@ public class TelaLogin extends JFrame implements ActionListener {
         // Cria um painel para o botão de confirmação e adiciona ao painel principal
         JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnConfirmar = new JButton("Confirmar");
+        btnConfirmar.setBackground(new Color (135, 206, 250));
         btnConfirmar.addActionListener(this);
         panelBotao.add(btnConfirmar);
         panelPrincipal.add(panelBotao, BorderLayout.SOUTH);

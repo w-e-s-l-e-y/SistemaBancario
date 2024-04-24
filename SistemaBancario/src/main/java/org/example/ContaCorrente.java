@@ -62,6 +62,13 @@ public class ContaCorrente {
         }
         saldo += valor;
     }
+    private void subtrairValorChequeEspecial(double valor) {
+        if (valor > 0 && chequeEspecial >= valor) {
+            chequeEspecial -= valor;
+        } else {
+            throw new IllegalArgumentException("Saldo insuficiente no cheque especial.");
+        }
+    }
 
     public void sacar(double valor) {
         if (!ativa) {
@@ -78,7 +85,7 @@ public class ContaCorrente {
             saldo = 0;
             chequeEspecial -= valorDoChequeEspecial;
             saldo -= valorDoChequeEspecial; // Reduz o saldo da conta para refletir o uso do cheque especial
-            System.out.println("Foram removidos R$" + valorDoChequeEspecial + " do seu valor de cheque especial. Agora você tem R$" + chequeEspecial + " sobrando.");
+            JOptionPane.showMessageDialog(null,"Foram removidos R$" + valorDoChequeEspecial + " do seu valor de cheque especial. Agora você tem R$" + chequeEspecial + " sobrando.");
         } else {
             saldo -= valor;
         }
@@ -135,13 +142,18 @@ public class ContaCorrente {
         } else {
             // Se não for, utiliza o cheque especial
             double valorDoChequeEspecial = valor - saldo;
-            saldo = 0;
-            chequeEspecial -= valorDoChequeEspecial;
+            if (valorDoChequeEspecial <= chequeEspecial) {
+                subtrairValorChequeEspecial(valorDoChequeEspecial);
+                saldo = 0;
+            } else {
+                throw new IllegalArgumentException("Saldo insuficiente no cheque especial.");
+            }
         }
 
         // Atualiza o saldo no banco de dados
         atualizarSaldoBancoDados(id, saldo, chequeEspecial);
     }
+
 
 
 

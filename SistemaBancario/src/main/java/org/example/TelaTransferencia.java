@@ -30,6 +30,7 @@ public class TelaTransferencia extends JFrame {
         JLabel lblValorTransferencia = new JLabel("Valor da Transferência:");
         txtValorTransferencia = new JTextField();
         JButton btnTransferir = new JButton("Transferir");
+        btnTransferir.setBackground(new Color (135, 206, 250));
 
         // Adicionando componentes ao painel
         panel.add(lblNumeroContaDestino);

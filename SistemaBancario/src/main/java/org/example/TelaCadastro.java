@@ -75,6 +75,7 @@ public class TelaCadastro extends JFrame implements ActionListener {
         // Cria um painel para o botão de cadastro e adiciona ao painel principal
         JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnCadastrar = new JButton("Cadastrar");
+        btnCadastrar.setBackground(new Color (135, 206, 250));
         btnCadastrar.addActionListener(this);
         panelBotao.add(btnCadastrar);
         panelPrincipal.add(panelBotao, BorderLayout.SOUTH);

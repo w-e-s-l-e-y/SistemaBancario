@@ -145,7 +145,7 @@ public class InterfacePrincipal extends JFrame {
                 // Atualiza o saldo na conta e no banco de dados
                 double valorSaque = valor - saldoAtual; // Valor a ser sacado do cheque especial
                 conta.sacar(valorSaque);
-                double novoChequeEspecial = conta.getChequeEspecial() - valorSaque;
+                double novoChequeEspecial = conta.getChequeEspecial();
                 // Atualiza o saldo no banco de dados
                 atualizarSaldoBancoDados(conta.getNumeroConta(), conta.getSaldo(), novoChequeEspecial);
                 lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
@@ -175,13 +175,13 @@ public class InterfacePrincipal extends JFrame {
 
 
 
-    public static void atualizarSaldoBancoDados(int numeroContaOrigem, double novoSaldo, double novoChequeEspecial) {
+    public static void atualizarSaldoBancoDados(int numeroConta, double novoSaldo, double novoChequeEspecial) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "UPDATE ContaCorrente SET saldo = ?, cheque_especial = ? WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, novoSaldo);
                 statement.setDouble(2, novoChequeEspecial);
-                statement.setInt(3, numeroContaOrigem);
+                statement.setInt(3, numeroConta);
                 statement.executeUpdate();
             }
         } catch (SQLException ex) {
