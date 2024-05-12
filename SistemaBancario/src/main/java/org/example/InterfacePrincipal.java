@@ -12,10 +12,11 @@ import java.sql.SQLException;
 public class InterfacePrincipal extends JFrame {
     private ContaCorrente conta; // Instância da classe Conta
     private JLabel lblSaldo;
+    private double chequeEspecialInicial;
 
     public InterfacePrincipal(ContaCorrente conta) {
         this.conta = conta;
-
+        chequeEspecialInicial = conta.getChequeEspecial();
         // Configurações básicas da janela
         setTitle("Sistema Bancário");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -89,7 +90,7 @@ public class InterfacePrincipal extends JFrame {
                 if (saldoPosterior >= 0) {
                     // Se o saldo após o depósito for maior ou igual a zero, ajusta o cheque especial
                     // para 1/3 do saldo após o depósito e mantém no máximo o valor atual do cheque especial
-                    novoChequeEspecial = Math.min(saldoPosterior / 3, novoChequeEspecial);
+                    novoChequeEspecial = chequeEspecialInicial;
                 }
 
 
@@ -126,33 +127,32 @@ public class InterfacePrincipal extends JFrame {
 
             // Calcula o saldo após o saque
             double saldoAtual = conta.getSaldo();
+            double chequeEspecial = conta.getChequeEspecial();
             double novoSaldo = saldoAtual - valor;
 
-            // Verifica se o saldo após o saque é suficiente
-            if (novoSaldo >= 0) {
-                // O saldo é suficiente, apenas atualiza o saldo na conta e no banco de dados
+            // Verifica se o saldo após o saque é suficiente ou se o cheque especial deve ser usado
+            if (novoSaldo >= -chequeEspecial) {
+                // O saldo é suficiente ou o cheque especial pode cobrir a diferença
                 conta.sacar(valor);
-                atualizarSaldoBancoDados(conta.getNumeroConta(), conta.getSaldo(), conta.getChequeEspecial());
+                if (novoSaldo < 0) {
+                    chequeEspecial += novoSaldo; // Adiciona a diferença ao cheque especial
+                    novoSaldo = 0; // Define o saldo como zero
+                }
+                // Atualiza o saldo no banco de dados
+                atualizarSaldoBancoDados(conta.getNumeroConta(), novoSaldo, chequeEspecial);
                 lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
                 JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
             } else {
-                // O saldo não é suficiente, utiliza o cheque especial se disponível
-                double saldoRestante = Math.abs(novoSaldo);
-                if (saldoRestante > conta.getChequeEspecial()) {
-                    JOptionPane.showMessageDialog(this, "Saldo insuficiente.");
-                    return;
-                }
-                // Atualiza o saldo na conta e no banco de dados
-                double valorSaque = valor - saldoAtual; // Valor a ser sacado do cheque especial
-                conta.sacar(valorSaque);
-                double novoChequeEspecial = conta.getChequeEspecial();
-                // Atualiza o saldo no banco de dados
-                atualizarSaldoBancoDados(conta.getNumeroConta(), conta.getSaldo(), novoChequeEspecial);
-                lblSaldo.setText("Saldo atual: R$ " + conta.getSaldo());
-                JOptionPane.showMessageDialog(this, "Saque de R$ " + valor + " realizado com sucesso.");
+                // Saldo insuficiente, exibe mensagem de erro
+                JOptionPane.showMessageDialog(this, "Saldo insuficiente.");
             }
         }
     }
+
+
+
+
+
 
 
 
@@ -176,7 +176,7 @@ public class InterfacePrincipal extends JFrame {
 
 
     public static void atualizarSaldoBancoDados(int numeroConta, double novoSaldo, double novoChequeEspecial) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "UPDATE ContaCorrente SET saldo = ?, cheque_especial = ? WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setDouble(1, novoSaldo);

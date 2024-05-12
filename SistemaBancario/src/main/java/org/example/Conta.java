@@ -3,8 +3,9 @@ package org.example;
 public class Conta {
     private int numero;
     private double saldo;
-    private static final double LIMITE_CHEQUE_ESPECIAL = 100.0; // Definindo o limite do cheque especial
+    private double chequeEspecial;
 
+    private double chequeEspecialInicial;
     public Conta(int numero, double saldoInicial) {
         if (numero <= 0) {
             throw new IllegalArgumentException("O número da conta deve ser maior que zero.");
@@ -13,7 +14,9 @@ public class Conta {
             throw new IllegalArgumentException("O saldo inicial não pode ser negativo.");
         }
         this.numero = numero;
-        this.saldo = saldoInicial + LIMITE_CHEQUE_ESPECIAL; // Adicionando o limite do cheque especial ao saldo inicial
+        this.saldo = saldoInicial; // Adicionando o limite do cheque especial ao saldo inicial
+        this.chequeEspecialInicial = saldoInicial/3;
+        this.chequeEspecial = chequeEspecialInicial;
     }
 
     public int getNumero() {
@@ -28,7 +31,13 @@ public class Conta {
         if (valor < 0) {
             throw new IllegalArgumentException("O valor a ser creditado não pode ser negativo.");
         }
+        double saldoAnterior = saldo;
         saldo += valor;
+        if (saldoAnterior < 0 && saldo >= 0) {
+            // Se o saldo anterior era negativo e o saldo atual se tornou não negativo após o depósito
+            // Restaura o cheque especial para o valor inicial
+            chequeEspecial = chequeEspecialInicial;
+        }
     }
 
     public void debitar(double valor) {
@@ -37,7 +46,7 @@ public class Conta {
         }
         if (valor > saldo) {
             // Se o valor for maior que o saldo, verificar se é possível usar o cheque especial
-            double valorDisponivel = saldo + LIMITE_CHEQUE_ESPECIAL;
+            double valorDisponivel = saldo + chequeEspecial;
             if (valor > valorDisponivel) {
                 throw new IllegalArgumentException("Saldo insuficiente para debitar o valor solicitado.");
             } else {
@@ -54,7 +63,7 @@ public class Conta {
 
     public void retirarChequeEspecial(double valor) {
         // Calcula o limite do cheque especial
-        double valorDisponivel = saldo + LIMITE_CHEQUE_ESPECIAL;
+        double valorDisponivel = saldo + chequeEspecial;
 
         // Verifica se o valor de retirada excede o limite disponível
         if (valor > valorDisponivel) {

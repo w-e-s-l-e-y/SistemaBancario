@@ -16,6 +16,8 @@ public class ContaCorrente {
     private double saldo;
     private double chequeEspecial;
     private boolean ativa;
+    private double chequeEspecialInicial;
+    private double saldoAnterior;
 
     public ContaCorrente(int id, double saldoInicial, boolean ativa) {
         if (id <= 0) {
@@ -23,7 +25,8 @@ public class ContaCorrente {
         }
         this.id = id;
         this.saldo = saldoInicial;
-        this.chequeEspecial = saldoInicial * PROPORCAO_CHEQUE_ESPECIAL; // Define o cheque especial como um terço do saldo inicial
+        this.chequeEspecialInicial = saldoInicial * PROPORCAO_CHEQUE_ESPECIAL; // Define o cheque especial como um terço do saldo inicial
+        this.chequeEspecial = chequeEspecialInicial;
         this.ativa = ativa;
     }
 
@@ -60,7 +63,13 @@ public class ContaCorrente {
         if (valor < 0) {
             throw new IllegalArgumentException("O valor a ser depositado não pode ser negativo.");
         }
+        saldoAnterior = saldo;
         saldo += valor;
+        if (saldoAnterior < 0 && saldo >= 0) {
+            // Se o saldo anterior era negativo e o saldo atual se tornou não negativo após o depósito
+            // Restaura o cheque especial para o valor inicial
+            chequeEspecial = chequeEspecialInicial;
+        }
     }
     private void subtrairValorChequeEspecial(double valor) {
         if (valor > 0 && chequeEspecial >= valor) {
@@ -85,7 +94,7 @@ public class ContaCorrente {
             saldo = 0;
             chequeEspecial -= valorDoChequeEspecial;
             saldo -= valorDoChequeEspecial; // Reduz o saldo da conta para refletir o uso do cheque especial
-            JOptionPane.showMessageDialog(null,"Foram removidos R$" + valorDoChequeEspecial + " do seu valor de cheque especial. Agora você tem R$" + chequeEspecial + " sobrando.");
+            JOptionPane.showMessageDialog(null,"Foram removidos R$" + valorDoChequeEspecial + " do seu valor de cheque especial. Agora você tem R$" + chequeEspecial + " de cheque sobrando.");
         } else {
             saldo -= valor;
         }

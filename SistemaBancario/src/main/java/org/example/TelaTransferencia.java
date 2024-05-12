@@ -77,7 +77,7 @@ public class TelaTransferencia extends JFrame {
     }
 
     private boolean verificarExistenciaConta(int numeroConta) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "SELECT * FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setInt(1, numeroConta);
@@ -91,23 +91,39 @@ public class TelaTransferencia extends JFrame {
     }
 
     private void transferir(int numeroContaOrigem, int numeroContaDestino, double valorTransferencia) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             // Verifica se há saldo suficiente na conta de origem
-            String sqlSaldo = "SELECT saldo FROM ContaCorrente WHERE cliente_id = ?";
+            String sqlSaldo = "SELECT saldo, cheque_especial FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statementSaldo = connection.prepareStatement(sqlSaldo)) {
                 statementSaldo.setInt(1, numeroContaOrigem);
                 ResultSet resultSetSaldo = statementSaldo.executeQuery();
                 if (resultSetSaldo.next()) {
                     double saldoOrigem = resultSetSaldo.getDouble("saldo");
-                    if (saldoOrigem >= valorTransferencia) {
-                        // Realiza a transferência subtraindo o valor da conta de origem e adicionando à conta de destino
-                        String sqlTransferencia = "UPDATE ContaCorrente SET saldo = saldo - ? WHERE cliente_id = ?";
+                    double chequeEspecialOrigem = resultSetSaldo.getDouble("cheque_especial");
+                    double saldoDisponivel = saldoOrigem + chequeEspecialOrigem;
+
+                    // Verifica se o saldo disponível é suficiente para a transferência
+                    if (saldoDisponivel >= valorTransferencia) {
+                        double novoSaldoOrigem = saldoOrigem - valorTransferencia;
+                        double novoChequeEspecialOrigem = chequeEspecialOrigem;
+
+                        // Atualiza o saldo na conta de origem
+                        if (novoSaldoOrigem < 0) {
+                            // Se o novo saldo for negativo, atualiza o cheque especial também
+                            novoChequeEspecialOrigem -= Math.abs(novoSaldoOrigem);
+                            novoSaldoOrigem = 0;
+                        }
+
+                        // Atualiza o saldo na conta de origem
+                        String sqlTransferencia = "UPDATE ContaCorrente SET saldo = ?, cheque_especial = ? WHERE cliente_id = ?";
                         try (PreparedStatement statementTransferencia = connection.prepareStatement(sqlTransferencia)) {
-                            statementTransferencia.setDouble(1, valorTransferencia);
-                            statementTransferencia.setInt(2, numeroContaOrigem);
+                            statementTransferencia.setDouble(1, novoSaldoOrigem);
+                            statementTransferencia.setDouble(2, novoChequeEspecialOrigem);
+                            statementTransferencia.setInt(3, numeroContaOrigem);
                             statementTransferencia.executeUpdate();
                         }
 
+                        // Atualiza o saldo na conta de destino
                         sqlTransferencia = "UPDATE ContaCorrente SET saldo = saldo + ? WHERE cliente_id = ?";
                         try (PreparedStatement statementTransferencia = connection.prepareStatement(sqlTransferencia)) {
                             statementTransferencia.setDouble(1, valorTransferencia);
@@ -127,10 +143,16 @@ public class TelaTransferencia extends JFrame {
         }
     }
 
+
+
+
+
+
+
     public double getNovoSaldo() {
         double novoSaldo = 0.0;
 
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "SELECT saldo FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setInt(1, numeroContaOrigem);

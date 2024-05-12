@@ -109,7 +109,7 @@ public class TelaInicio extends JFrame implements ActionListener {
     }
 
     private ContaCorrente obterContaDoBancoDeDados(String nome, int numeroConta) {
-        String url = "jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
+        String url = "jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
         try (Connection connection = DriverManager.getConnection(url)) {
             String sql = "SELECT id, saldo, ativa " +
                     "FROM ContaCorrente " +
