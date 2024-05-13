@@ -57,6 +57,7 @@ public class TelaTransferencia extends JFrame {
         String valorTransferenciaStr = txtValorTransferencia.getText();
 
         if (!numeroContaDestinoStr.isEmpty() && !valorTransferenciaStr.isEmpty()) {
+
             try {
                 int numeroContaDestino = Integer.parseInt(numeroContaDestinoStr);
                 double valorTransferencia = Double.parseDouble(valorTransferenciaStr);
@@ -100,38 +101,50 @@ public class TelaTransferencia extends JFrame {
                 if (resultSetSaldo.next()) {
                     double saldoOrigem = resultSetSaldo.getDouble("saldo");
                     double chequeEspecialOrigem = resultSetSaldo.getDouble("cheque_especial");
-                    double saldoDisponivel = saldoOrigem + chequeEspecialOrigem;
 
-                    // Verifica se o saldo disponível é suficiente para a transferência
-                    if (saldoDisponivel >= valorTransferencia) {
+                    // Verifica se o saldo disponível (saldo + cheque especial) é suficiente para a transferência
+                    if ((saldoOrigem + chequeEspecialOrigem) >= valorTransferencia) {
+                        // Saldo suficiente, realiza a transferência normalmente
                         double novoSaldoOrigem = saldoOrigem - valorTransferencia;
-                        double novoChequeEspecialOrigem = chequeEspecialOrigem;
+                        double diferenca = saldoOrigem-valorTransferencia;
+                        double novoSaldo = saldoOrigem - (valorTransferencia+diferenca);
 
-                        // Atualiza o saldo na conta de origem
+                        // Verifica se o novo saldo é negativo e utiliza o cheque especial se necessário
                         if (novoSaldoOrigem < 0) {
-                            // Se o novo saldo for negativo, atualiza o cheque especial também
-                            novoChequeEspecialOrigem -= Math.abs(novoSaldoOrigem);
-                            novoSaldoOrigem = 0;
+                            double valorUtilizadoChequeEspecial = Math.abs(novoSaldoOrigem);
+                            double novoSaldoChequeEspecial = chequeEspecialOrigem - valorUtilizadoChequeEspecial;
+
+                            // Atualiza o saldo na conta de origem e o cheque especial
+                            String sqlTransferencia = "UPDATE ContaCorrente SET saldo = ?, cheque_especial = ? WHERE cliente_id = ?";
+                            try (PreparedStatement statementTransferencia = connection.prepareStatement(sqlTransferencia)) {
+                                statementTransferencia.setDouble(1, novoSaldo); // Saldo fica em zero
+                                statementTransferencia.setDouble(2, novoSaldoChequeEspecial); // Atualiza o cheque especial
+                                statementTransferencia.setInt(3, numeroContaOrigem);
+                                statementTransferencia.executeUpdate();
+                            }
+
+                            JOptionPane.showMessageDialog(this, "Transferência de R$ " + valorTransferencia + " realizada utilizando o cheque especial.");
+                        } else {
+                            // Atualiza o saldo na conta de origem
+                            String sqlTransferencia = "UPDATE ContaCorrente SET saldo = ? WHERE cliente_id = ?";
+                            try (PreparedStatement statementTransferencia = connection.prepareStatement(sqlTransferencia)) {
+                                statementTransferencia.setDouble(1, novoSaldo);
+                                statementTransferencia.setInt(2, numeroContaOrigem);
+                                statementTransferencia.executeUpdate();
+                            }
+
+                            JOptionPane.showMessageDialog(this, "Transferência de R$ " + valorTransferencia + " realizada com sucesso.");
                         }
 
-                        // Atualiza o saldo na conta de origem
-                        String sqlTransferencia = "UPDATE ContaCorrente SET saldo = ?, cheque_especial = ? WHERE cliente_id = ?";
-                        try (PreparedStatement statementTransferencia = connection.prepareStatement(sqlTransferencia)) {
-                            statementTransferencia.setDouble(1, novoSaldoOrigem);
-                            statementTransferencia.setDouble(2, novoChequeEspecialOrigem);
-                            statementTransferencia.setInt(3, numeroContaOrigem);
-                            statementTransferencia.executeUpdate();
-                        }
 
                         // Atualiza o saldo na conta de destino
-                        sqlTransferencia = "UPDATE ContaCorrente SET saldo = saldo + ? WHERE cliente_id = ?";
+                        String sqlTransferencia = "UPDATE ContaCorrente SET saldo = saldo + ? WHERE cliente_id = ?";
                         try (PreparedStatement statementTransferencia = connection.prepareStatement(sqlTransferencia)) {
                             statementTransferencia.setDouble(1, valorTransferencia);
                             statementTransferencia.setInt(2, numeroContaDestino);
                             statementTransferencia.executeUpdate();
                         }
 
-                        JOptionPane.showMessageDialog(this, "Transferência de R$ " + valorTransferencia + " realizada com sucesso.");
                         dispose(); // Fecha a janela de transferência
                     } else {
                         JOptionPane.showMessageDialog(this, "Saldo insuficiente na conta de origem.");
@@ -142,9 +155,6 @@ public class TelaTransferencia extends JFrame {
             JOptionPane.showMessageDialog(this, "Erro ao realizar a transferência: " + ex.getMessage());
         }
     }
-
-
-
 
 
 
