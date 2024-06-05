@@ -78,7 +78,7 @@ public class TelaTransferencia extends JFrame {
     }
 
     private boolean verificarExistenciaConta(int numeroConta) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "SELECT * FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setInt(1, numeroConta);
@@ -92,7 +92,7 @@ public class TelaTransferencia extends JFrame {
     }
 
     private void transferir(int numeroContaOrigem, int numeroContaDestino, double valorTransferencia) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             // Verifica se há saldo suficiente na conta de origem
             String sqlSaldo = "SELECT saldo, cheque_especial FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statementSaldo = connection.prepareStatement(sqlSaldo)) {
@@ -162,7 +162,7 @@ public class TelaTransferencia extends JFrame {
     public double getNovoSaldo() {
         double novoSaldo = 0.0;
 
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
             String sql = "SELECT saldo FROM ContaCorrente WHERE cliente_id = ?";
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setInt(1, numeroContaOrigem);

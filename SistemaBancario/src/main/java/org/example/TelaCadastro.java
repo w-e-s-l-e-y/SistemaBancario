@@ -9,6 +9,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TelaCadastro extends JFrame implements ActionListener {
     private JTextField campoNome;
@@ -17,6 +19,7 @@ public class TelaCadastro extends JFrame implements ActionListener {
     private JTextField campoTipo;
     private JTextField campoSaldoInicial;
     private JButton btnCadastrar;
+    private RealtimeDatabase rtdb;
 
     public TelaCadastro() {
         setTitle("Cadastro de Cliente");
@@ -46,11 +49,6 @@ public class TelaCadastro extends JFrame implements ActionListener {
         panelCampos.add(new JLabel("Tipo:"), gbc);
         gbc.gridy++;
         panelCampos.add(new JLabel("Saldo Inicial:"), gbc);
-
-
-
-
-
 
         gbc.gridx = 1;
         gbc.gridy = 0;
@@ -85,13 +83,10 @@ public class TelaCadastro extends JFrame implements ActionListener {
 
         // Adiciona o painel principal à janela
         add(panelPrincipal);
+
+        // Inicializa o RealtimeDatabase
+        rtdb = new RealtimeDatabase();
     }
-
-    // Cria um painel para o botão de cadastro e adiciona ao painel principal
-    JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
-
-
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -101,49 +96,74 @@ public class TelaCadastro extends JFrame implements ActionListener {
             int idade = Integer.parseInt(campoIdade.getText());
             String email = campoEmail.getText();
             int tipo = Integer.parseInt(campoTipo.getText());
+            double saldoInicial = Double.parseDouble(campoSaldoInicial.getText());
+            double chequeEspecial = saldoInicial *4 ;
 
-            // Estabelecer a conexão com o banco de dados SQLite C:\Users\fluib\Documents\GitHub\senac\SistemaBancario\SistemaBancario\src\main\java\org\example
-            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
-                // Inserir o cliente na tabela Cliente
-                String sqlCliente = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
-                try (PreparedStatement statement = connection.prepareStatement(sqlCliente, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                    statement.setString(1, nome);
-                    statement.setInt(2, idade);
-                    statement.setString(3, email);
-                    statement.setInt(4, tipo);
-                    statement.setBoolean(5, true); // Supondo que o cliente é sempre cadastrado como ativo
+            try {
+                // Obter o último número de conta do Firebase
+                int lastAccountNumber = rtdb.getLastAccountNumber();
+                int newAccountNumber = lastAccountNumber + 1;
 
-                    // Executar a instrução SQL para inserir o cliente
-                    int rowsInserted = statement.executeUpdate();
-                    if (rowsInserted > 0) {
-                        // Recuperar o id do cliente recém-inserido
-                        ResultSet generatedKeys = statement.getGeneratedKeys();
-                        if (generatedKeys.next()) {
-                            int clienteId = generatedKeys.getInt(1);
-                            // Inserir uma nova conta associada ao cliente na tabela Conta
-                            String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id, cheque_especial) VALUES (?, ?, ?, ?)";
-                            try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta, PreparedStatement.RETURN_GENERATED_KEYS)) {
-                                contaStatement.setDouble(1, Double.parseDouble(campoSaldoInicial.getText())); // Saldo inicial 0
-                                contaStatement.setBoolean(2, true); // Conta ativa
-                                contaStatement.setInt(3, clienteId); // Id do cliente
-                                contaStatement.setInt(4, (int) (Double.parseDouble(campoSaldoInicial.getText()) / 3)); // cheque especial do cliente
-                                int contaInserted = contaStatement.executeUpdate();
-                                if (contaInserted > 0) {
-                                    ResultSet contaGeneratedKeys = contaStatement.getGeneratedKeys();
-                                    if (contaGeneratedKeys.next()) {
-                                        int contaId = contaGeneratedKeys.getInt(1);
-                                        JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso! O número da conta é: " + contaId);
-                                        this.dispose(); // Fechar a tela de cadastro
+                // Estabelecer a conexão com o banco de dados SQLite
+                try (Connection connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db")) {
+                    // Inserir o cliente na tabela Cliente
+                    String sqlCliente = "INSERT INTO Cliente (nome, idade, email, tipo, ativo) VALUES (?, ?, ?, ?, ?)";
+                    try (PreparedStatement statement = connection.prepareStatement(sqlCliente, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                        statement.setString(1, nome);
+                        statement.setInt(2, idade);
+                        statement.setString(3, email);
+                        statement.setInt(4, tipo);
+                        statement.setBoolean(5, true); // Supondo que o cliente é sempre cadastrado como ativo
+
+                        // Executar a instrução SQL para inserir o cliente
+                        int rowsInserted = statement.executeUpdate();
+                        if (rowsInserted > 0) {
+                            // Recuperar o id do cliente recém-inserido
+                            ResultSet generatedKeys = statement.getGeneratedKeys();
+                            if (generatedKeys.next()) {
+                                int clienteId = generatedKeys.getInt(1);
+                                // Inserir uma nova conta associada ao cliente na tabela Conta
+                                String sqlConta = "INSERT INTO ContaCorrente (saldo, ativa, cliente_id, cheque_especial) VALUES (?, ?, ?, ?)";
+                                try (PreparedStatement contaStatement = connection.prepareStatement(sqlConta, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                                    contaStatement.setDouble(1, saldoInicial); // Saldo inicial
+                                    contaStatement.setBoolean(2, true); // Conta ativa
+                                    contaStatement.setInt(3, clienteId); // Id do cliente
+                                    contaStatement.setDouble(4, chequeEspecial); // cheque especial do cliente
+                                    int contaInserted = contaStatement.executeUpdate();
+                                    if (contaInserted > 0) {
+                                        ResultSet contaGeneratedKeys = contaStatement.getGeneratedKeys();
+                                        if (contaGeneratedKeys.next()) {
+                                            int contaId = contaGeneratedKeys.getInt(1);
+                                            JOptionPane.showMessageDialog(this, "Cadastro realizado com sucesso! O número da conta é: " + newAccountNumber);
+
+                                            // Salvar os dados no Firebase Realtime Database
+                                            Map<String, Object> clienteData = new HashMap<>();
+                                            clienteData.put("ativo", 1);
+                                            clienteData.put("cheque_Especial", chequeEspecial);
+                                            clienteData.put("cheque_Especial_Fixo", chequeEspecial);
+                                            clienteData.put("conta", newAccountNumber);
+                                            clienteData.put("email", email);
+                                            clienteData.put("idade", idade);
+                                            clienteData.put("nome", nome);
+                                            clienteData.put("saldo", saldoInicial);
+                                            clienteData.put("tipo", 1);
+
+                                            rtdb.setValue("correntistas/" + newAccountNumber, clienteData);
+
+                                            this.dispose(); // Fechar a tela de cadastro
+                                        }
                                     }
                                 }
                             }
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente.");
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente.");
                     }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados: " + ex.getMessage());
                 }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados: " + ex.getMessage());
+            } catch (InterruptedException ex) {
+                JOptionPane.showMessageDialog(this, "Erro ao obter o último número de conta: " + ex.getMessage());
             }
         }
     }

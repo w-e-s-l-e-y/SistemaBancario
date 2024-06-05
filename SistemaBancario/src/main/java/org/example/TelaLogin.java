@@ -4,10 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +14,7 @@ public class TelaLogin extends JFrame implements ActionListener {
     private JLabel lblStatus;
     private boolean loginSuccessful = false;
     private List<ActionListener> loginListeners = new ArrayList<>();
+    private RealtimeDatabase rtdb;
 
     public TelaLogin() {
         setTitle("Login");
@@ -29,7 +26,7 @@ public class TelaLogin extends JFrame implements ActionListener {
         JPanel panelPrincipal = new JPanel(new BorderLayout());
         panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Adiciona margens de 20px em todos os lados
 
-        // Define um painel para os campos de entrada com GridLayout
+        // Define um painel para os campos de entrada com GridBagLayout
         JPanel panelCampos = new JPanel(new GridBagLayout()); // Layout gerenciado pelo GridBagLayout para controle mais preciso
 
         // Cria um GridBagConstraints para configurar o posicionamento dos componentes
@@ -65,7 +62,7 @@ public class TelaLogin extends JFrame implements ActionListener {
         // Cria um painel para o botão de confirmação e adiciona ao painel principal
         JPanel panelBotao = new JPanel(new FlowLayout(FlowLayout.CENTER));
         btnConfirmar = new JButton("Confirmar");
-        btnConfirmar.setBackground(new Color (135, 206, 250));
+        btnConfirmar.setBackground(new Color(135, 206, 250));
         btnConfirmar.addActionListener(this);
         panelBotao.add(btnConfirmar);
         panelPrincipal.add(panelBotao, BorderLayout.SOUTH);
@@ -76,6 +73,9 @@ public class TelaLogin extends JFrame implements ActionListener {
 
         // Adiciona o painel principal à janela
         add(panelPrincipal);
+
+        // Inicializa o RealtimeDatabase
+        rtdb = new RealtimeDatabase();
     }
 
     @Override
@@ -85,12 +85,21 @@ public class TelaLogin extends JFrame implements ActionListener {
             String numeroContaStr = campoNumeroConta.getText();
             if (!numeroContaStr.isEmpty()) {
                 int numeroConta = Integer.parseInt(numeroContaStr);
-                if (validarNumeroConta(numeroConta)) {
-                    // Se o número da conta for válido, define o login como bem-sucedido
-                    loginSuccessful = true;
-                    lblStatus.setText("Logado com sucesso!");
-                } else {
-                    lblStatus.setText("Número da conta inválido.");
+                try {
+                    if (rtdb.validarLogin(nome, numeroConta)) {
+                        // Se o login for válido, define o login como bem-sucedido
+                        loginSuccessful = true;
+                        lblStatus.setText("Logado com sucesso!");
+
+                        // Criar e exibir a InterfacePrincipal
+                        ContaCorrente conta = new ContaCorrente(numeroConta, 0, true); // Inicialize conforme necessário
+                        new InterfacePrincipal(conta, rtdb).setVisible(true); // Passe a instância de RealtimeDatabase aqui
+                        dispose(); // Fecha a tela de login
+                    } else {
+                        lblStatus.setText("Nome ou número da conta inválido.");
+                    }
+                } catch (InterruptedException ex) {
+                    lblStatus.setText("Erro ao conectar ao Firebase: " + ex.getMessage());
                 }
             } else {
                 lblStatus.setText("Digite um número de conta.");
@@ -126,8 +135,11 @@ public class TelaLogin extends JFrame implements ActionListener {
         }
     }
 
-    // Método para validar o número da conta (você pode adicionar suas próprias regras de validação)
-    private boolean validarNumeroConta(int numeroConta) {
-        return numeroConta > 0; // Número da conta deve ser positivo
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new TelaLogin().setVisible(true);
+            }
+        });
     }
 }

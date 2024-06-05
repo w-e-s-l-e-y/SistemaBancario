@@ -26,9 +26,9 @@ public class TelaInicio extends JFrame implements ActionListener {
         lblBemVindo.setFont(lblBemVindo.getFont().deriveFont(Font.BOLD, 18f)); // Define a fonte em negrito e tamanho 18
 
         btnLogin = new JButton("Login");
-        btnLogin.setBackground(new Color (135, 206, 250));
+        btnLogin.setBackground(new Color(135, 206, 250));
         btnCadastro = new JButton("Cadastro");
-        btnCadastro.setBackground(new Color (135, 206, 250));
+        btnCadastro.setBackground(new Color(135, 206, 250));
 
         // Cria um JPanel para o título e os botões
         JPanel panelPrincipal = new JPanel();
@@ -109,7 +109,7 @@ public class TelaInicio extends JFrame implements ActionListener {
     }
 
     private ContaCorrente obterContaDoBancoDeDados(String nome, int numeroConta) {
-        String url = "jdbc:sqlite:E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
+        String url = "jdbc:sqlite:C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db";
         try (Connection connection = DriverManager.getConnection(url)) {
             String sql = "SELECT id, saldo, ativa " +
                     "FROM ContaCorrente " +
@@ -139,9 +139,11 @@ public class TelaInicio extends JFrame implements ActionListener {
     }
 
     private void abrirInterfacePrincipal(ContaCorrente conta) {
-        InterfacePrincipal interfacePrincipal = new InterfacePrincipal(conta);
+        RealtimeDatabase realtimeDatabase = new RealtimeDatabase(); // Crie uma instância de RealtimeDatabase
+        InterfacePrincipal interfacePrincipal = new InterfacePrincipal(conta, realtimeDatabase); // Passe ambos os parâmetros
         interfacePrincipal.setVisible(true);
     }
+
 
     private void abrirTelaCadastro() {
         TelaCadastro telaCadastro = new TelaCadastro();

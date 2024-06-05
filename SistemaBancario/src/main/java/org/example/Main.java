@@ -13,6 +13,8 @@ public class Main {
                 // Criar o banco de dados se ele não existir
                 criarBancoSeNecessario();
 
+                // Testar a conexão com o Firebase
+
                 // Criar e exibir a tela de início
                 new TelaInicio().setVisible(true);
             }
@@ -21,7 +23,7 @@ public class Main {
 
     private static void criarBancoSeNecessario() {
         // Definir o caminho para o banco de dados SQLite
-        String path = "E:\\SistemaBancario\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db"; // Substitua pelo caminho desejado
+        String path = "C:\\Users\\964610\\Documents\\GitHub\\SistemaBancario\\SistemaBancario\\src\\main\\java\\org\\example\\wykbank.db"; // Substitua pelo caminho desejado
 
         // Verificar se o banco de dados já existe
         File dbFile = new File(path);
@@ -83,4 +85,7 @@ public class Main {
             statement.executeUpdate(sql);
         }
     }
+
+
+
 }
