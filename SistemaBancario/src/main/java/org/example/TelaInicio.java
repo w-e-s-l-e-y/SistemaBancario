@@ -96,7 +96,11 @@ public class TelaInicio extends JFrame implements ActionListener {
 
                     if (conta != null) {
                         fecharTelaInicio(); // Fechar a tela de início
-                        abrirInterfacePrincipal(conta); // Passa a instância válida de ContaCorrente
+                        try {
+                            abrirInterfacePrincipal(conta); // Passa a instância válida de ContaCorrente
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
                         telaLogin.dispose(); // Fecha a tela de login após o login bem-sucedido
                         JOptionPane.showMessageDialog(null, "Logado com sucesso!");
                     } else {
@@ -138,7 +142,7 @@ public class TelaInicio extends JFrame implements ActionListener {
         dispose(); // Fecha a tela de início
     }
 
-    private void abrirInterfacePrincipal(ContaCorrente conta) {
+    private void abrirInterfacePrincipal(ContaCorrente conta) throws InterruptedException {
         RealtimeDatabase realtimeDatabase = new RealtimeDatabase(); // Crie uma instância de RealtimeDatabase
         InterfacePrincipal interfacePrincipal = new InterfacePrincipal(conta, realtimeDatabase); // Passe ambos os parâmetros
         interfacePrincipal.setVisible(true);

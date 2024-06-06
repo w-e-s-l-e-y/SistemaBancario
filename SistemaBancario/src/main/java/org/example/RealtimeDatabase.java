@@ -104,17 +104,32 @@ public class RealtimeDatabase {
 			@Override
 			public void onDataChange(DataSnapshot dataSnapshot) {
 				if (dataSnapshot.exists()) {
-					double saldo = dataSnapshot.child("saldo").getValue(Double.class);
-					double chequeEspecial = dataSnapshot.child("cheque_Especial").getValue(Double.class);
-					boolean ativa = dataSnapshot.child("ativo").getValue(Boolean.class);
-					contaCorrente[0] = new ContaCorrente(numeroConta, saldo, ativa);
-					contaCorrente[0].setChequeEspecial(chequeEspecial);
+					System.out.println("DataSnapshot exists: " + dataSnapshot.getKey()); // Depuração
+					System.out.println("DataSnapshot contents: " + dataSnapshot.getValue()); // Depuração
+
+					Double saldo = dataSnapshot.child("saldo").getValue(Double.class);
+					Double chequeEspecial = dataSnapshot.child("cheque_Especial").getValue(Double.class);
+					Boolean ativa = dataSnapshot.child("ativo").getValue(Boolean.class);
+
+					System.out.println("Saldo: " + saldo); // Depuração
+					System.out.println("Cheque Especial: " + chequeEspecial); // Depuração
+					System.out.println("Ativa: " + ativa); // Depuração
+
+					if (saldo != null && chequeEspecial != null && ativa != null) {
+						contaCorrente[0] = new ContaCorrente(numeroConta, saldo, ativa);
+						contaCorrente[0].setChequeEspecial(chequeEspecial);
+					} else {
+						System.out.println("Erro ao ler os valores do snapshot."); // Depuração
+					}
+				} else {
+					System.out.println("DataSnapshot does not exist"); // Depuração
 				}
 				latch.countDown();
 			}
 
 			@Override
 			public void onCancelled(DatabaseError databaseError) {
+				System.out.println("DatabaseError: " + databaseError.getMessage()); // Depuração
 				latch.countDown();
 			}
 		});
@@ -122,4 +137,6 @@ public class RealtimeDatabase {
 		latch.await();
 		return contaCorrente[0];
 	}
+
+
 }
